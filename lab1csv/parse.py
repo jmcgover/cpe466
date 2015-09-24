@@ -2,8 +2,6 @@
 import sys
 import os
 
-def 
-
 def main():
     print 'hello'
 

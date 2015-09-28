@@ -4,6 +4,11 @@ from __future__ import print_function
 import sys
 import os
 
+# Custom files
+sys.path.append(os.getcwd())
+from document import Document
+from vocabulary import Vocabulary
+
 def main():
 
     # Initial input checking
@@ -27,6 +32,29 @@ def main():
     if paragraphCount:
         paragraphCount += 1
     print("Paragraph Count: %d" % (paragraphCount))
+    doc = Document()
+    vocab = Vocabulary()
+    vocab.add('fuck')
+    vocab.add('fuck')
+    vocab.add('fuck')
+    vocab.add('fuck')
+    vocab.add('fuck')
+    vocab.add('fuck')
+    vocab.add('shit')
+    vocab.add('shit')
+    vocab.add('shit')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    vocab.add('muh')
+    for w in vocab:
+        print("%s: %d" % (w, vocab.getWordCount(w)))
     return 0
 
 if __name__ == '__main__':

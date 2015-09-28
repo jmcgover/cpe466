@@ -1,11 +1,12 @@
 #!/usr/bin/python
 from __future__ import print_function
 
-import sys
 import os
+import sys
 
 # Custom files
 sys.path.append(os.getcwd())
+import document
 from document import Document
 from vocabulary import Vocabulary
 
@@ -21,41 +22,16 @@ def main():
     if sys.argv[1][-3:] != "txt":
         print("Bad file extenstion.")
         sys.exit(22)
-    file = open(sys.argv[1], 'r')
-    lines = file.readlines()
-    file.close()
-    paragraphCount = 0
-    for line in lines:
-        if line == '\n':
-            print("Found a new line!")
-            paragraphCount += 1
-    if paragraphCount:
-        paragraphCount += 1
-    print("Paragraph Count: %d" % (paragraphCount))
     doc = Document()
-    vocab = Vocabulary()
-    vocab.add('fuck')
-    vocab.add('fuck')
-    vocab.add('fuck')
-    vocab.add('fuck')
-    vocab.add('fuck')
-    vocab.add('fuck')
-    vocab.add('shit')
-    vocab.add('shit')
-    vocab.add('shit')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    vocab.add('muh')
-    for w in vocab:
-        print("%s: %d" % (w, vocab.getWordCount(w)))
-    return 0
+    with open(sys.argv[1]) as file:
+        parser = document.Parser(file, doc)
+        parser.parseDocument()
+    print("Total Words         : %d" % (doc.getNumTotalWords()))
+    print("Different Words     : %d" % (doc.getNumDifferentWords()))
+    print("Number of Sentences : %d" % (doc.getNumSentences()))
+    print("Number of Paragraphs: %d" % (doc.getNumParagraphs()))
+    for w in doc:
+        print("%s: %s" % (w, doc.getWordCount(w)))
 
 if __name__ == '__main__':
     main()

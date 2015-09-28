@@ -1,9 +1,10 @@
 #!/usr/bin/python
+from __future__ import print_function
+
 import sys
 import os
 
 def main():
-    print 'hello'
 
     # Initial input checking
     if len(sys.argv) < 2:

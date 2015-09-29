@@ -19,12 +19,14 @@ DEF_FREQ_PERCENT = 10
 DEF_TOP_WORDS = 10
 
 def buildArguments():
-    argParser = argparse.ArgumentParser(description=DESCRIPTION)
+    argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION)
     argParser.add_argument('-f', '--file',
             action='store',
             metavar='file',
             help='the file to be parsed appended with .csv for CSV and .txt for a text document',
             required=True)
+    # CSV Parsing Args
+    # Document Parsing Args
     argParser.add_argument('-m', '--most-frequent',
             action='store_true',
             help='displays the most frequent word')
@@ -63,11 +65,11 @@ def argError(msg):
     sys.exit(22)
 
 def main():
-    print("------------")
     argParser = buildArguments()
     args = argParser.parse_args()
     filename = args.file
     print(args)
+    print("------------")
     if filename[-3:] == 'txt':
         print('Opening document...')
         doc = Document()

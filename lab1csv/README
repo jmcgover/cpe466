@@ -19,15 +19,6 @@ An object oriented document parser.
 Jeff McGovern - jmcgover@calpoly.edu
 Nicole Martin - nlmartin@calpoly.edu
 
-Usage for csv files, command line:
-$ ./parse.py <file.csv>
+To show usage and all supported arguments, run the following on the command line: 
+./run.py -h
 
-Usage for text files, command line:
-$ ./parse.py <file.txt> [-arguments space delimited]
-
-Summary of text file flag options:
--lw 	  : list all words in the document
--lwf 	  : list all words in the document with their frequency
--stats 	  : list total number of words, different words, sentences, and paragraphs in the document
--mfw 	  : report the most frequent word(s) and their frequency
--findword="A" : looks for the specific word "A" and in the document, reports its frequency

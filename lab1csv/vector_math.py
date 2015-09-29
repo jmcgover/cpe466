@@ -82,7 +82,7 @@ def minRow(x):
     return min(x)
 def medianRow(x):
     sortedX = sorted(x)
-    return sortedX[floor(len(x) / 2)]
+    return sortedX[int(floor(len(x) / 2))]
 
 
 

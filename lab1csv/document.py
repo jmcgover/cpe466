@@ -7,30 +7,59 @@ import sys
 
 # Custom files
 sys.path.append(os.getcwd())
-from vocabulary import Vocabulary
+import bisect
+import operator
 
-# SENTENCE
-#class Sentence(object):
-#    def __init__(self):
-#        self.vocab = Vocabulary()
-#        print('Started a new sentence!') #TODO REMOVE
-#
-#    def addWords(self, words):
-#        for w in words:
-#            self.vocab.addWord(w)
-## PARAGRAPH
-#class Paragraph(object):
-#    def __init__(self):
-#        self.vocab = Vocabulary()
-#        self.sentences = []
-#        print('Found a new paragraph!') #TODO REMOVE
-#
-#    def addWords(self, words):
-#        for w in words:
-#            self.vocab.addWord(w)
-#    def addSentences(self, sentences):
-#        for s in sentences:
-#            self.sentences.append(sentence)
+class Vocabulary(object):
+    def __init__(self):
+        self.vocab = {}
+        self.wordList = []
+        self.totalWords = 0
+#        print('Made a blank vocabulary!') #TODO REMOVE
+
+    def __iter__(self):
+        return self.wordList.__iter__()
+
+    def add(self, word):
+        if word not in self.vocab:
+            self.vocab[word] = 0
+            bisect.insort(self.wordList, word)
+        self.vocab[word] += 1
+        self.totalWords += 1
+
+    def getWordCount(self, word):
+        if word in self.vocab:
+            return self.vocab[word]
+        else:
+            return 0
+
+    def getNumTotalWords(self):
+        return self.totalWords
+
+    def getNumDifferentWords(self):
+        return len(self.wordList)
+
+    def getWordList(self):
+        return self.wordList
+    def getNMostCommonWords(self, n):
+        sortedVocab = sorted(self.vocab.items(), key=operator.itemgetter(1))
+        sortedByFreqWords = []
+        for w in reversed(sortedVocab):
+            sortedByFreqWords.append(w[0])
+        return sortedByFreqWords[:n]
+    def getWordsAboveFrequency(self, freq):
+        wordsAbove = []
+        for w in self.vocab:
+            if self.getWordCount(w) > freq:
+                wordsAbove.append(w)
+        return wordsAbove
+    def getWordsEqualToFrequency(self, freq):
+        wordsEqual = []
+        for w in self.vocab:
+            if self.getWordCount(w) == freq:
+                wordsEqual.append(w)
+        return wordsEqual
+
 
 # DOCUMENT
 class Document(object):
@@ -66,6 +95,31 @@ class Document(object):
 
     def getNumParagraphs(self):
         return self.paragraphs
+
+    def getMostFrequentWord(self):
+        mostFrequentCount = 0
+        mostFrequentWord = None
+        for w in self.vocab:
+            if self.getWordCount(w) > mostFrequentCount:
+                mostFrequentWord = w
+                mostFrequentCount = self.getWordCount(w)
+        return mostFrequentWord
+    def getMostFrequentWords(self, percent):
+        mostFrequentWord = self.getMostFrequentWord()
+        mostFrequentCount = self.getWordCount(mostFrequentWord)
+        lowerBound = mostFrequentCount - (mostFrequentCount * percent / 100)
+        mostFrequentWords = []
+        for w in self.vocab:
+            if self.getWordCount(w) >= lowerBound:
+                mostFrequentWords.append(w)
+        return mostFrequentWords
+    def getTopWords(self, topNum):
+        return self.vocab.getNMostCommonWords(topNum)
+    def getWordsAboveFrequency(self, freq):
+        return self.vocab.getWordsAboveFrequency(freq)
+    def getWordsEqualToFrequency(self, freq):
+        return self.vocab.getWordsEqualToFrequency(freq)
+
 
 # DELIMITERS
 DELIM_SENT = "\.|!|\?"
@@ -110,21 +164,13 @@ class Parser(object):
                 self.document.addSentence(num=len(punctMarks))
                 sentences = regexSent.split(line)
                 sentences = filter(None, sentences)
-#                print("%d: %s" % (self.numLines, line))
                 for s in sentences:
                     s = s.strip()
-#                    print("\t[%s]" % (s))
-#                    print("\t\t", end='')
                     words = regexWord.split(s)
                     words = filter(None, words)
                     for w in words:
-                        w = w.strip("'")
+                        w = w.strip("'").strip('-')
                         if w:
                             self.document.addWord(w)
-#                            print("{%s}" % (w), end="")
-#                    print()
-#                print()
-#        print("Sent: %s" % DELIM_SENT)
-#        print("Word: %s" % DELIM_WORD)
         return None
 

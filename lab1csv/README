@@ -21,3 +21,12 @@ Nicole Martin - nlmartin@calpoly.edu
 
 To show usage and all supported arguments, run the following on the command line: 
 ./run.py -h
+
+To get a showcase of the features, run:
+./doTests.sh
+
+Note:
+--Ignore parse.py, please. That accidentally made it into the handin directory.
+--The doTests.sh expects the csv-files and txt-files folder to be in the
+working directory. This is changeable via the appropriate variables in the
+shell script.

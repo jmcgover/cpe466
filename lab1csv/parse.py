@@ -26,12 +26,12 @@ def main():
         with open(sys.argv[1]) as file:
             parser = document.Parser(file, doc)
             parser.parseDocument()
+        for w in doc:
+            print("%s: %s" % (w, doc.getWordCount(w)))
         print("Total Words         : %d" % (doc.getNumTotalWords()))
         print("Different Words     : %d" % (doc.getNumDifferentWords()))
         print("Number of Sentences : %d" % (doc.getNumSentences()))
         print("Number of Paragraphs: %d" % (doc.getNumParagraphs()))
-        for w in doc:
-            print("%s: %s" % (w, doc.getWordCount(w)))
     elif sys.argv[1][-3:] == "csv":
         print("CSV file extenstion.")
         csv = Custom_CSV()

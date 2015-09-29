@@ -38,6 +38,7 @@ class Document(object):
         self.vocab = Vocabulary()
         self.paragraphs = 0
         self.sentences = 0
+        self.countedParagraph = False
         print('Made a new document class!') #TODO REMOVE
     def __iter__(self):
         return self.vocab.__iter__()
@@ -99,8 +100,11 @@ class Parser(object):
         for line in self.file:
             self.numLines += 1
             if line == "\n":
-                self.document.addParagraph()
+                if not self.countedParagraph:
+                    self.document.addParagraph()
+                    self.countedParagraph = True
             else:
+                self.countedParagraph = False
                 line = line.strip()
                 punctMarks = regexSent.findall(line)
                 self.document.addSentence(num=len(punctMarks))

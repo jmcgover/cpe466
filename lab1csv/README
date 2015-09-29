@@ -15,3 +15,12 @@
                    ########: ##:::: ##: ########::::::'######:
                   ........::..:::::..::........:::::::......::
 An object oriented document parser.
+
+Jeff McGovern - jmcgover@calpoly.edu
+Nicole Martin - nlmartin@calpoly.edu
+
+Usage for csv files, command line:
+$ ./parse.py <file.csv>
+
+Usage for text files, command line:
+$ ./parse.py <file.txt>

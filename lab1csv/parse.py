@@ -33,7 +33,6 @@ def main():
         print("Number of Sentences : %d" % (doc.getNumSentences()))
         print("Number of Paragraphs: %d" % (doc.getNumParagraphs()))
     elif sys.argv[1][-3:] == "csv":
-        print("CSV file extenstion.")
         csv = Custom_CSV()
         with open(sys.argv[1]) as file:
             parser = custom_csv.CSV_Parser(file, csv)

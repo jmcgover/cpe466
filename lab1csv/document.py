@@ -39,7 +39,7 @@ class Document(object):
         self.paragraphs = 0
         self.sentences = 0
         self.countedParagraph = False
-        print('Made a new document class!') #TODO REMOVE
+#        print('Made a new document class!') #TODO REMOVE
     def __iter__(self):
         return self.vocab.__iter__()
 
@@ -94,7 +94,7 @@ class Parser(object):
         self.document = document
         self.vocab = Vocabulary()
         self.numLines = 0
-        print('Building a parser!') #TODO REMOVE
+#        print('Building a parser!') #TODO REMOVE
 
     def parseDocument(self):
         for line in self.file:
@@ -110,21 +110,21 @@ class Parser(object):
                 self.document.addSentence(num=len(punctMarks))
                 sentences = regexSent.split(line)
                 sentences = filter(None, sentences)
-                print("%d: %s" % (self.numLines, line))
+#                print("%d: %s" % (self.numLines, line))
                 for s in sentences:
                     s = s.strip()
-                    print("\t[%s]" % (s))
-                    print("\t\t", end='')
+#                    print("\t[%s]" % (s))
+#                    print("\t\t", end='')
                     words = regexWord.split(s)
                     words = filter(None, words)
                     for w in words:
                         w = w.strip("'")
                         if w:
                             self.document.addWord(w)
-                            print("{%s}" % (w), end="")
-                    print()
-                print()
-        print("Sent: %s" % DELIM_SENT)
-        print("Word: %s" % DELIM_WORD)
+#                            print("{%s}" % (w), end="")
+#                    print()
+#                print()
+#        print("Sent: %s" % DELIM_SENT)
+#        print("Word: %s" % DELIM_WORD)
         return None
 

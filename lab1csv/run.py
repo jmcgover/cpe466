@@ -36,6 +36,10 @@ def buildArguments():
             const=DEF_TOP_WORDS,
             metavar='num',
             help='displays the top num CSV rows or top num words (default is %d)' % DEF_TOP_WORDS)
+    argParser.add_argument('-q', '--quiet',
+            action='store_true',
+            help='quiet some of the output')
+
     # CSV Parsing Args
     argParser.add_argument('-L', '--length',
             metavar='row',
@@ -44,6 +48,18 @@ def buildArguments():
             metavar='row1 row2',
             nargs=2,
             help='computes the dot product between the vectors at row1 and row2')
+    argParser.add_argument('-E', '--euclidean',
+            metavar='row1 row2',
+            nargs=2,
+            help='computes the Euclidean Distance between the vectors at row1 and row2')
+    argParser.add_argument('-M', '--manhattan',
+            metavar='row1 row2',
+            nargs=2,
+            help='computes the Manhattan Distance between the vectors at row1 and row2')
+    argParser.add_argument('-P', '--pearson',
+            metavar='row1 row2',
+            nargs=2,
+            help='computes the Pearson Correlation between the vectors at row1 and row2')
 
     # Document Parsing Args
     argParser.add_argument('-m', '--most-frequent',
@@ -88,12 +104,16 @@ def main():
         print('okay csv')
         csv = Custom_CSV()
         print('Opening csv...')
-        with open(args.file) as file:
-            print('Parsing csv...')
-            parser = custom_csv.CSV_Parser(file, csv)
-            parser.parseCSV()
-            print('Done!')
-            print("------------")
+        try :
+            with open(args.file) as file:
+                print('Parsing csv...')
+                parser = custom_csv.CSV_Parser(file, csv)
+                parser.parseCSV()
+                print('Done!')
+                print("------------")
+        except FileNotFoundError as e:
+            print('Could not find file %s' % (args.file))
+            return e.errno
         if args.display_all:
             print('Displaying all vectors and their rows...')
             print('%-16s %-13s' % ('Row', 'Vector'))
@@ -128,23 +148,132 @@ def main():
                 print('Row %d is out of range' % row)
                 return 22
             print('Computing length of row %d...' % row)
-            print("row %2d: " % row, end="")
             v = csv.getVector(row)
-            for e in v:
-                print("%f\t" % e, end="")
-            print()
+            if not args.quiet:
+                print("row %2d: " % row, end="")
+                for e in v:
+                    print("%f\t" % e, end="")
+                print()
             print("length: %f" % vector_math.length(v))
+            print("------------")
+        if args.dot:
+            row1 = int(args.dot[0])
+            row2 = int(args.dot[1])
+            if row1 < 0 or row2 < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row1 > csv.getNumVectors() or row2 > csv.getNumVectors():
+                print('Row %s is out of range' % args.dot)
+                return 22
+            x = csv.getVector(row1)
+            y = csv.getVector(row2)
+            print('Computing dot product of row %d and %d...' % (row1, row2))
+            if len(x) == len(y):
+                if not args.quiet:
+                    print("row1 %2d: " % row1, end="")
+                    for e in x:
+                        print("%f\t" % e, end="")
+                    print()
+                    print("row2 %2d: " % row2, end="")
+                    for e in y:
+                        print("%f\t" % e, end="")
+                    print()
+                print("Dot Product: %f" % vector_math.dot(x, y))
+            else:
+                print('Row %d does not have the same length as %d' % (row1, row2))
+            print("------------")
+        if args.euclidean:
+            row1 = int(args.euclidean[0])
+            row2 = int(args.euclidean[1])
+            if row1 < 0 or row2 < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row1 > csv.getNumVectors() or row2 > csv.getNumVectors():
+                print('Row %s is out of range' % args.dot)
+                return 22
+            x = csv.getVector(row1)
+            y = csv.getVector(row2)
+            print('Computing Euclidean Distance of row %d and %d...' % (row1, row2))
+            if len(x) == len(y):
+                if not args.quiet:
+                    print("row1 %2d: " % row1, end="")
+                    for e in x:
+                        print("%f\t" % e, end="")
+                    print()
+                    print("row2 %2d: " % row2, end="")
+                    for e in y:
+                        print("%f\t" % e, end="")
+                    print()
+                print("Euclidean Distance: %f" % vector_math.euclideanDistance(x, y))
+            else:
+                print('Row %d does not have the same length as %d' % (row1, row2))
+            print("------------")
+        if args.manhattan:
+            row1 = int(args.manhattan[0])
+            row2 = int(args.manhattan[1])
+            if row1 < 0 or row2 < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row1 > csv.getNumVectors() or row2 > csv.getNumVectors():
+                print('Row %s is out of range' % args.dot)
+                return 22
+            x = csv.getVector(row1)
+            y = csv.getVector(row2)
+            print('Computing Manhattan Distance of row %d and %d...' % (row1, row2))
+            if len(x) == len(y):
+                if not args.quiet:
+                    print("row1 %2d: " % row1, end="")
+                    for e in x:
+                        print("%f\t" % e, end="")
+                    print()
+                    print("row2 %2d: " % row2, end="")
+                    for e in y:
+                        print("%f\t" % e, end="")
+                    print()
+                print("Manhattan Distance  : %f" % vector_math.manhattanDistance(x, y))
+            else:
+                print('Row %d does not have the same length as %d' % (row1, row2))
+            print("------------")
+        if args.pearson:
+            row1 = int(args.pearson[0])
+            row2 = int(args.pearson[1])
+            if row1 < 0 or row2 < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row1 > csv.getNumVectors() or row2 > csv.getNumVectors():
+                print('Row %s is out of range' % args.dot)
+                return 22
+            x = csv.getVector(row1)
+            y = csv.getVector(row2)
+            print('Computing Pearson Correlation of row %d and %d...' % (row1, row2))
+            if len(x) == len(y):
+                if not args.quiet:
+                    print("row1 %2d: " % row1, end="")
+                    for e in x:
+                        print("%f\t" % e, end="")
+                    print()
+                    print("row2 %2d: " % row2, end="")
+                    for e in y:
+                        print("%f\t" % e, end="")
+                    print()
+                print("Pearson Correlation: %f" % vector_math.pearsonCorrelation(x, y))
+            else:
+                print('Row %d does not have the same length as %d' % (row1, row2))
             print("------------")
     elif filename[-3:] == 'txt':
         doc = Document()
         # Read Document
         print('Opening document...')
-        with open(args.file) as file:
-            print('Parsing document...')
-            parser = document.Parser(file, doc)
-            parser.parseDocument()
-            print('Done!')
-            print("------------")
+        try:
+            with open(args.file) as file:
+                print('Parsing document...')
+                parser = document.Parser(file, doc)
+                parser.parseDocument()
+                print('Done!')
+                print("------------")
+        except FileNotFoundError as e:
+            print('Could not find file %s' % (args.file))
+            return e.errno
         # Display Document
         if args.display_all:
             print('Displaying all words and their occurrences...')

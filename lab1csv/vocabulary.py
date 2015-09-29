@@ -6,7 +6,7 @@ class Vocabulary(object):
         self.vocab = {}
         self.wordList = []
         self.totalWords = 0
-        print('Made a blank vocabulary!') #TODO REMOVE
+#        print('Made a blank vocabulary!') #TODO REMOVE
 
     def __iter__(self):
         return self.wordList.__iter__()
@@ -19,7 +19,10 @@ class Vocabulary(object):
         self.totalWords += 1
 
     def getWordCount(self, word):
-        return self.vocab[word]
+        if word in self.vocab:
+            return self.vocab[word]
+        else:
+            return 0
 
     def getNumTotalWords(self):
         return self.totalWords

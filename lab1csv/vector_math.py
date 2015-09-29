@@ -30,7 +30,7 @@ def euclideanDistance(x, y):
 
     sumSquares = 0.0
     for i,j in zip(x, y):
-        sumSquares += i * j
+        sumSquares += (i - j) * (i - j)
     return sqrt(sumSquares)
 
 def manhattanDistance(x, y):
@@ -43,30 +43,38 @@ def manhattanDistance(x, y):
     return sumProjections
 
 def avg(x):
+    if len(x) == 0:
+        return 0
     return sum(x) / len(x)
 def stdev(x):
+    if len(x) == 0:
+        return 0
     eX = avg(x)
     deviation = 0
     for i in x:
         deviation += (i - eX) * (i - eX)
     return sqrt(deviation/len(x))
+def cov(x, y):
+    if len(x) != len(y):
+        raise ArithmeticError('vectors must have identical length')
+    if len(x) == 0 or len(y) == 0:
+        return 0
+    eX = avg(x)
+    eY = avg(y)
+    n = len(x)
+    covXY = 0
+    for i,j in zip(x,y):
+        covXY += ((i - eX) * (j - eY))/n
+    return covXY
 def pearsonCorrelation(x, y):
     if len(x) != len(y):
         raise ArithmeticError('vectors must have identical length')
+    if len(x) == 0 or len(y) == 0:
+        return 0;
 
-    covXY = 0
-    eX = avg(x)
-    eY = avg(y)
-    stdevX = stdev(x)
-    stdevY = stdev(y)
-    if len(x) > 0 and stdevX > 0 and stdevY > 0:
-        for i,j in zip(x,y):
-            covXY += (i - eX) * (j - eY)
-        return (covXY) / ((len(x) - 1) * stdev(x) * stdev(y))
-    else:
-        return 0.0
+    return cov(x,y) / (stdev(x) * stdev(y))
 
-def avgRow(x):
+def meanRow(x):
     return avg(x)
 def maxRow(x):
     return max(x)

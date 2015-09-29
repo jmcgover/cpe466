@@ -28,6 +28,12 @@ class Custom_CSV(object):
         return self.vectors
     def addVector(self, v):
         self.vectors.append(v)
+    def getColumn(self, col):
+        column = []
+        for v in self.vectors:
+            if col < len(v):
+                column.append(v[col])
+        return column
 
 # CSV_PARSER
 class CSV_Parser(object):
@@ -45,5 +51,9 @@ class CSV_Parser(object):
                 line = line.replace(",\n",",0\n")   # null for last value
                 values = line.split(",")            # returns a list of words
                 for index, item in enumerate(values):
-                    values[index] = float(item)
+                    try:
+                        values[index] = float(item)
+                    except ValueError as e:
+                        values[index] = 0
+
                 self.csv.addVector(values)

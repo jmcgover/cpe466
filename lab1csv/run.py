@@ -50,21 +50,47 @@ def buildArguments():
             metavar='row',
             help='computes the length of the vector at row row')
     argParser.add_argument('-D', '--dot',
-            metavar='row1 row2',
+            metavar='row',
             nargs=2,
-            help='computes the dot product between the vectors at row1 and row2')
+            help='computes the dot product between the vectors at indices row (row can be two different values)')
     argParser.add_argument('-E', '--euclidean',
-            metavar='row1 row2',
+            metavar='row',
             nargs=2,
-            help='computes the Euclidean Distance between the vectors at row1 and row2')
+            help='computes the Euclidean Distance between the vectors at indices row (row can be two different values)')
     argParser.add_argument('-M', '--manhattan',
-            metavar='row1 row2',
+            metavar='row',
             nargs=2,
-            help='computes the Manhattan Distance between the vectors at row1 and row2')
+            help='computes the Manhattan Distance between the vectors at indices row (row can be two different values)')
     argParser.add_argument('-P', '--pearson',
-            metavar='row1 row2',
+            metavar='row',
             nargs=2,
-            help='computes the Pearson Correlation between the vectors at row1 and row2')
+            help='computes the Pearson Correlation between the vectors at indices row (row can be two different values)')
+
+    argParser.add_argument('--min-row',
+            metavar='row',
+            help='computes the min value of the elements in row')
+    argParser.add_argument('--max-row',
+            metavar='row',
+            help='computes the max value of the elements in row')
+    argParser.add_argument('--median-row',
+            metavar='row',
+            help='computes the median value of the elements in row')
+    argParser.add_argument('--mean-row',
+            metavar='row',
+            help='computes the mean value of the elements in row')
+
+    argParser.add_argument('--min-col',
+            metavar='column',
+            help='computes the min value of the elements in column')
+    argParser.add_argument('--max-col',
+            metavar='column',
+            help='computes the max value of the elements in column')
+    argParser.add_argument('--median-col',
+            metavar='column',
+            help='computes the median value of the elements in column')
+    argParser.add_argument('--mean-col',
+            metavar='column',
+            help='computes the mean value of the elements in column')
 
     # Document Parsing Args
     argParser.add_argument('-m', '--most-frequent',
@@ -265,6 +291,152 @@ def main():
             else:
                 print('Row %d does not have the same length as %d' % (row1, row2))
             print("------------")
+        if args.min_row:
+            row = int(args.min_row)
+            print('Computing min for row %d' % row)
+            if row < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row > csv.getNumVectors():
+                print('Row %d is out of range' % row)
+                return 22
+            print('Computing min of row %d...' % row)
+            v = csv.getVector(row)
+            if not args.quiet:
+                print("row %2d: " % row, end="")
+                for e in v:
+                    print("%f\t" % e, end="")
+                print()
+            print("min: %f" % vector_math.minRow(v))
+            print("------------")
+        if args.max_row:
+            row = int(args.max_row)
+            print('Computing max for row %d' % row)
+            if row < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row > csv.getNumVectors():
+                print('Row %d is out of range' % row)
+                return 22
+            print('Computing max of row %d...' % row)
+            v = csv.getVector(row)
+            if not args.quiet:
+                print("row %2d: " % row, end="")
+                for e in v:
+                    print("%f\t" % e, end="")
+                print()
+            print("max: %f" % vector_math.maxRow(v))
+            print("------------")
+        if args.median_row:
+            row = int(args.median_row)
+            print('Computing median for row %d' % row)
+            if row < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row > csv.getNumVectors():
+                print('Row %d is out of range' % row)
+                return 22
+            print('Computing median of row %d...' % row)
+            v = csv.getVector(row)
+            if not args.quiet:
+                print("row %2d: " % row, end="")
+                for e in v:
+                    print("%f\t" % e, end="")
+                print()
+            print("median: %f" % vector_math.medianRow(v))
+            print("------------")
+        if args.mean_row:
+            row = int(args.mean_row)
+            print('Computing mean for row %d' % row)
+            if row < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row > csv.getNumVectors():
+                print('Row %d is out of range' % row)
+                return 22
+            print('Computing mean of row %d...' % row)
+            v = csv.getVector(row)
+            if not args.quiet:
+                print("row %2d: " % row, end="")
+                for e in v:
+                    print("%f\t" % e, end="")
+                print()
+            print("mean: %f" % vector_math.meanRow(v))
+            print("------------")
+
+        if args.min_col:
+            col = int(args.min_col)
+            print('Computing min for col %d' % col)
+            if col < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            print('Computing min of column %d...' % col)
+            c = csv.getColumn(col)
+            if len(c) > 0:
+                if not args.quiet:
+                    print("%d" % col);
+                    print("---");
+                    for e in c:
+                        print("%f" % e)
+                print("min: %f" % vector_math.minRow(c))
+            else:
+                print("Column %d had no entries" % col)
+            print("------------")
+        if args.max_col:
+            col = int(args.max_col)
+            print('Computing max for col %d' % col)
+            if col < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            print('Computing max of column %d...' % col)
+            c = csv.getColumn(col)
+            if len(c) > 0:
+                if not args.quiet:
+                    print("%d" % col);
+                    print("---");
+                    for e in c:
+                        print("%f" % e)
+                print("max: %f" % vector_math.maxRow(c))
+            else:
+                print("Column %d had no entries" % col)
+            print("------------")
+        if args.median_col:
+            col = int(args.median_col)
+            print('Computing median for col %d' % col)
+            if col < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            print('Computing median of column %d...' % col)
+            c = csv.getColumn(col)
+            if len(c) > 0:
+                if not args.quiet:
+                    print("%d" % col);
+                    print("---");
+                    for e in c:
+                        print("%f" % e)
+                print("median: %f" % vector_math.medianRow(c))
+            else:
+                print("Column %d had no entries" % col)
+            print("------------")
+        if args.mean_col:
+            col = int(args.mean_col)
+            print('Computing mean for col %d' % col)
+            if col < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            print('Computing mean of column %d...' % col)
+            c = csv.getColumn(col)
+            if len(c) > 0:
+                if not args.quiet:
+                    print("%d" % col);
+                    print("---");
+                    for e in c:
+                        print("%f" % e)
+                print("mean: %f" % vector_math.meanRow(c))
+            else:
+                print("Column %d had no entries" % col)
+            print("------------")
+
     elif filename[-3:] == 'txt':
         doc = Document()
         # Read Document

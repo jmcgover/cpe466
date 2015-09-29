@@ -18,7 +18,7 @@ class Custom_CSV(object):
 # CSV_PARSER
 class CSV_Parser(object):
     def __init__(self, file, Custom_CSV):
-	self.file = file
+        self.file = file
         self.csv = Custom_CSV
         self.vectors = []
 
@@ -29,10 +29,10 @@ class CSV_Parser(object):
                 if line[0] == ',': # null for first value
                     line = '0' + line
                 line = line.replace(",,",",0,") # null in middle of vector
-	        line = line.replace(",\n",",0\n") # null for last value
+            line = line.replace(",\n",",0\n") # null for last value
 #                print(line)
-                values = line.split(",") # returns a list of words
-                for index, item in enumerate(values):
-                    values[index] = float(item)
-                print(values)
+            values = line.split(",") # returns a list of words
+            for index, item in enumerate(values):
+                values[index] = float(item)
+            print(values)
 

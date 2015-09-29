@@ -1,4 +1,5 @@
 #! /usr/bin/python
+from __future__ import print_function
 
 import os
 import re
@@ -109,7 +110,7 @@ class Parser(object):
                 for s in sentences:
                     s = s.strip()
                     print("\t[%s]" % (s))
-                    print("\t\t", end="")
+                    print("\t\t", end='')
                     words = regexWord.split(s)
                     words = filter(None, words)
                     for w in words:

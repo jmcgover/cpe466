@@ -15,7 +15,6 @@ sys.path.append(os.getcwd())
 
 import document
 from document import Document
-from vocabulary import Vocabulary
 
 import custom_csv
 from custom_csv import Custom_CSV
@@ -129,7 +128,6 @@ def main():
     argParser = buildArguments()
     args = argParser.parse_args()
     filename = args.file
-    print(args)
     print("------------")
     if filename[-3:] == 'csv':
         print('okay csv')

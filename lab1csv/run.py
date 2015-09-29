@@ -7,12 +7,15 @@ import sys
 
 # Custom Libraries
 sys.path.append(os.getcwd())
+
 import document
 from document import Document
 from vocabulary import Vocabulary
 
 import custom_csv
 from custom_csv import Custom_CSV
+
+import vector_math
 
 DESCRIPTION="CPE 466 Lab 1: A csv and text document parser."
 DEF_FREQ_PERCENT = 10
@@ -25,7 +28,23 @@ def buildArguments():
             metavar='file',
             help='the file to be parsed appended with .csv for CSV and .txt for a text document',
             required=True)
+    argParser.add_argument('-d', '--display-all',
+            action='store_true',
+            help='display either all vectors in the CSV or all words in the document')
+    argParser.add_argument('-t', '--top',
+            nargs='?',
+            const=DEF_TOP_WORDS,
+            metavar='num',
+            help='displays the top num CSV rows or top num words (default is %d)' % DEF_TOP_WORDS)
     # CSV Parsing Args
+    argParser.add_argument('-L', '--length',
+            metavar='row',
+            help='computes the length of the vector at row row')
+    argParser.add_argument('-D', '--dot',
+            metavar='row1 row2',
+            nargs=2,
+            help='computes the dot product between the vectors at row1 and row2')
+
     # Document Parsing Args
     argParser.add_argument('-m', '--most-frequent',
             action='store_true',
@@ -36,11 +55,6 @@ def buildArguments():
             metavar='percent',
             help='displays the words within percent percent frequency \
                     of the most frequent word [0,100] (default is %d percent)' % DEF_FREQ_PERCENT)
-    argParser.add_argument('-t', '--top-words',
-            nargs='?',
-            const=DEF_TOP_WORDS,
-            metavar='num',
-            help='displays the top num words (default is %d)' % DEF_TOP_WORDS)
     argParser.add_argument('-w', '--word',
             metavar='word1,word2,...',
             help='displays the frequency of the specified words')
@@ -70,14 +84,73 @@ def main():
     filename = args.file
     print(args)
     print("------------")
-    if filename[-3:] == 'txt':
-        print('Opening document...')
+    if filename[-3:] == 'csv':
+        print('okay csv')
+        csv = Custom_CSV()
+        print('Opening csv...')
+        with open(args.file) as file:
+            print('Parsing csv...')
+            parser = custom_csv.CSV_Parser(file, csv)
+            parser.parseCSV()
+            print('Done!')
+            print("------------")
+        if args.display_all:
+            print('Displaying all vectors and their rows...')
+            print('%-16s %-13s' % ('Row', 'Vector'))
+            for i in range(0,csv.getNumVectors()):
+                print("%d: " % i, end="")
+                for e in csv.getVector(i):
+                    print("%f\t" % e, end="")
+                print()
+            print("------------")
+        if args.top:
+            top = int(args.top)
+            if top < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if top > csv.getNumVectors():
+                print('Row %d is out of range' % top)
+                return 22
+            print('Displaying top %d rows...' % top)
+            print('%-16s %-13s' % ('Row', 'Vector'))
+            for i in range(0,top):
+                print("%d: " % i, end="")
+                for e in csv.getVector(i):
+                    print("%f\t" % e, end="")
+                print()
+            print("------------")
+        if args.length:
+            row = int(args.length)
+            if row < 0:
+                print('Please do not give the program negative numbers')
+                return 22
+            if row > csv.getNumVectors():
+                print('Row %d is out of range' % row)
+                return 22
+            print('Computing length of row %d...' % row)
+            print("row %2d: " % row, end="")
+            v = csv.getVector(row)
+            for e in v:
+                print("%f\t" % e, end="")
+            print()
+            print("length: %f" % vector_math.length(v))
+            print("------------")
+    elif filename[-3:] == 'txt':
         doc = Document()
+        # Read Document
+        print('Opening document...')
         with open(args.file) as file:
             print('Parsing document...')
             parser = document.Parser(file, doc)
             parser.parseDocument()
             print('Done!')
+            print("------------")
+        # Display Document
+        if args.display_all:
+            print('Displaying all words and their occurrences...')
+            print('%-16s %-13s' % ('Word', 'Occurrences'))
+            for w in doc:
+                print('%-16s %-13d' % (w, doc.getWordCount(w)))
             print("------------")
         if args.most_frequent:
             print('Finding most frequent...')
@@ -96,8 +169,8 @@ def main():
             for w in mostFreqWords:
                 print('%-16s %-13d' % (w, doc.getWordCount(w)))
             print("------------")
-        if args.top_words:
-            topNum = int(args.top_words)
+        if args.top:
+            topNum = int(args.top)
             if topNum < 0:
                 print('Please do not give the program negative numbers')
                 return 22
@@ -146,8 +219,6 @@ def main():
             print("Number of Paragraphs  : %d" % (doc.getNumParagraphs()))
             print("------------")
 
-    elif filename[-3:] == 'csv':
-        print('okay csv')
     else:
         print('Please provide either a .csv or a .txt file to be parsed')
         return 22

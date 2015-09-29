@@ -1,9 +1,18 @@
 #!/usr/bin/python
-import sys
+from __future__ import print_function
+
 import os
+import sys
+
+# Custom files
+sys.path.append(os.getcwd())
+import document
+from document import Document
+from vocabulary import Vocabulary
+import custom_csv
+from custom_csv import Custom_CSV
 
 def main():
-    print 'hello'
 
     # Initial input checking
     if len(sys.argv) < 2:
@@ -12,21 +21,26 @@ def main():
     if os.path.isfile(sys.argv[1]) == False:
         print("File does not exist.")
         sys.exit(22)
-    if sys.argv[1][-3:] != "txt":
+    if sys.argv[1][-3:] == "txt":
+        doc = Document()
+        with open(sys.argv[1]) as file:
+            parser = document.Parser(file, doc)
+            parser.parseDocument()
+        for w in doc:
+            print("%s: %s" % (w, doc.getWordCount(w)))
+        print("Total Words         : %d" % (doc.getNumTotalWords()))
+        print("Different Words     : %d" % (doc.getNumDifferentWords()))
+        print("Number of Sentences : %d" % (doc.getNumSentences()))
+        print("Number of Paragraphs: %d" % (doc.getNumParagraphs()))
+    elif sys.argv[1][-3:] == "csv":
+        print("CSV file extenstion.")
+        csv = Custom_CSV()
+        with open(sys.argv[1]) as file:
+            parser = custom_csv.CSV_Parser(file, csv)
+            parser.parseCSV()
+    else:
         print("Bad file extenstion.")
         sys.exit(22)
-    file = open(sys.argv[1], 'r')
-    lines = file.readlines()
-    file.close()
-    paragraphCount = 0
-    for line in lines:
-        if line == '\n':
-            print("Found a new line!")
-            paragraphCount += 1
-    if paragraphCount:
-        paragraphCount += 1
-    print("Paragraph Count: %d" % (paragraphCount))
-    return 0
 
 if __name__ == '__main__':
     main()

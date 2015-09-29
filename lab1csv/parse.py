@@ -9,6 +9,8 @@ sys.path.append(os.getcwd())
 import document
 from document import Document
 from vocabulary import Vocabulary
+import custom_csv
+from custom_csv import Custom_CSV
 
 def main():
 
@@ -32,7 +34,10 @@ def main():
             print("%s: %s" % (w, doc.getWordCount(w)))
     elif sys.argv[1][-3:] == "csv":
         print("CSV file extenstion.")
-        sys.exit(22)
+        csv = Custom_CSV()
+        with open(sys.argv[1]) as file:
+            parser = custom_csv.CSV_Parser(file, csv)
+            parser.parseCSV()
     else:
         print("Bad file extenstion.")
         sys.exit(22)

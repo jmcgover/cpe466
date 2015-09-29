@@ -1,4 +1,9 @@
 #! /usr/bin/python
+
+# CPE 466 Fall 2015
+# Jeff McGovern - jmcgover@calpoly.edu
+# Nicole Martin - nlmartin@calpoly.edu
+
 from __future__ import print_function
 
 import os

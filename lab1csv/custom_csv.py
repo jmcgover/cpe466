@@ -1,5 +1,9 @@
 #! /usr/bin/python
 
+# CPE 466 Fall 2015
+# Jeff McGovern - jmcgover@calpoly.edu
+# Nicole Martin - nlmartin@calpoly.edu
+
 import os
 import re
 import sys

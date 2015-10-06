@@ -26,20 +26,35 @@ def buildArguments():
 
     return argParser
 
+def argError(msg):
+   if msg:
+      print("%s: error: %s" % (os.path.basename(__file__), msg) )
+      sys.exit(22)
+
 def main():
-    argParser = buildArguments()
-    args = argParser.parse_args()
-    filename = args.file
-    if filename[-4:] != 'json':
-        print('This better be a json file!')
-    with open(filename) as corpus:
-        try:
-            json.load(corpus)
-        except ValueError as err:
-            print('Failed to load %s as json file' % filename)
-            return 22
-        print('Sucessfully loaded %s' % filename)
-    return 0
+   argParser = buildArguments()
+   args = argParser.parse_args()
+   filename = args.file
+   print("----------")
+   if filename[-4:] == 'json':
+      print('Okay json')
+      print('Opening JSON...')
+      try:
+         with open(args.file) as raw_data_file:
+            print('Parsing JSON...')
+            data = json.load(raw_data_file)
+        #    for item in data:
+        #       print("PersonType: %s" % (item["PersonType"]))
+        #       print(item["text"])
+            print('Done!')
+            print("----------")
+      except FileNotFoundError as e:
+         print('Could not find file %s' % (args.file))
+         return e.errno
+      return 0
+   else:
+      print('Add support for the stored, processed json.')
+      return 22
 
 if __name__ == '__main__':
     main()

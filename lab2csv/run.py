@@ -11,17 +11,22 @@ import json
 import os
 import pickle
 import sys
+import textwrap
 
 # Custom Libraries
 sys.path.append(os.getcwd())
 import argparse
 import utterance
+
 from utterance import UtteranceCollection
+from utterance import Vocabulary
+from stemming import PorterStemmer
+
 import query
 from query import Query
 
 DESCRIPTION="CPE 466 Lab 2: Information Retrieval from Digital Democracy."
-
+DEF_TOP = 10
 def buildArguments():
     argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION)
     argParser.add_argument('-f','--filename',
@@ -32,14 +37,19 @@ def buildArguments():
     argParser.add_argument('-s', '--stem',
             action='store_true',
             help='stems the text of the file to be parsed')
-    argParser.add_argument('-w','--stopword-file',
+    argParser.add_argument('-w','--stopword-filename',
             action='store',
-            metavar='stopwordfile',
+            metavar='filename',
             help='the .txt file containing stopwords to be removed from processing')
     argParser.add_argument('-q','--query-filename',
             action='store',
-            metavar='query-filename',
+            metavar='filename',
             help='the .txt file containing the query')
+    argParser.add_argument('-t', '--top',
+            nargs='?',
+            const=DEF_TOP,
+            metavar='num',
+            help='displays the top num results (default is %d)' % DEF_TOP)
     return argParser
 
 def argError(msg):
@@ -48,23 +58,36 @@ def argError(msg):
         sys.exit(22)
 
 def main():
+    # ARGUMENT PARSING
     argParser = buildArguments()
     args = argParser.parse_args()
-    stopwords = args.stopword_file
 
-    if args.stem:
-        stem = True
-    else:
-        stem = False
     print("----------")
+    # STEMMING CREATION
+    stemmer = None
+    if args.stem:
+        stemmer = PorterStemmer()
 
-    if stopwords != '' and stopwords is not None:
-        if stopwords[-4:] != '.txt':
-            print('Wrong stopword file format')
+    # STOPWORD CREATION
+    stopwordVocab = None
+    if args.stopword_filename:
+        stopwordList = None
+        if args.stopword_filename[-4:] != '.txt':
+            print('Wrong stopword file format: please provide a .txt file')
             return errno.EINVAL
-    else:
-        stopwords = ''
+        try:
+            with open(args.filename) as raw_data_file:
+                print('Building stopword vocabulary: %s' % (args.stopword_filename))
+                stopwordList = raw_data_file.readlines()
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                print('Could not find stopword file %s' % (args.file))
+                return errno.ENOENT
+        stopwordVocab = Vocabulary()
+        for w in stopwordList:
+            stopwordVocab.add(w)
 
+    # COLLECTION CREATION
     collection = None
     if args.filename[-5:] == '.json':
         try:
@@ -80,7 +103,7 @@ def main():
             if e.errno == errno.ENOENT:
                 print('Could not find file %s' % (args.file))
                 return errno.ENOENT
-        collection = UtteranceCollection(jsonData)
+        collection = UtteranceCollection(jsonData, stemmer=stemmer, stopwordVocab=stopwordVocab)
         print('Done!')
         print("----------")
 #        if args.pickle:
@@ -108,7 +131,10 @@ def main():
     else:
         print('File issue, make sure you include a queryfile with the .pickle results')
         return errno.EINVAL
+    # QUERYING
     if args.query_filename and args.query_filename[-4:] == '.txt':
+        # TOP RESULTS
+        topResultNum = int(args.top) if args.top else DEF_TOP
         queryText = None
         print("Opening query file %s" % (args.query_filename))
         try:
@@ -120,12 +146,17 @@ def main():
                 return errno.ENOENT
             else:
                 raise
-        query = Query(queryText, collection)
+        query = Query(queryText, collection, stemmer=stemmer, stopwordVocab=stopwordVocab)
         print("Finding documents related to:")
         print("%s" % queryText)
         query.findResults()
-        for res in query.getResults(5):
-            print("%.3f:%d: %s" % (res.getSimilarity(), res.getDocument().pid, res.getDocument().text))
+        print("Finding top %s results" % topResultNum)
+        i = 1
+        for res in query.getResults(topResultNum):
+
+            resultStr = "%-2d|%.3f\t%d\t%s" % (i, res.getSimilarity(), res.getDocument().pid, res.getDocument().text)
+            print(resultStr)
+            i += 1
 
 if __name__ == '__main__':
     rtn = main()

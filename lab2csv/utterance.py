@@ -50,6 +50,11 @@ class Vocabulary(object):
 
     def getWordList(self):
         return self.wordList
+    def isIn(self, word):
+        return self.getWordCount(word) > 0
+
+    def isNotIn(self, word):
+        return self.getWordCount(word) == 0
 
 class InvertedIndex(object):
     def __init__(self):
@@ -145,11 +150,9 @@ class Utterance(object):
               return True
         return False
 
-
-
 # UTTERANCE COLLECTION
 class UtteranceCollection(object):
-    def __init__(self, jsonData, stemmer=None, stopwords=None):
+    def __init__(self, jsonData, stemmer=None, stopwordVocab=None):
         self.index = InvertedIndex()
         self.vocab = Vocabulary()
         self.utterances = []
@@ -157,7 +160,7 @@ class UtteranceCollection(object):
         self.maxFreq = 0
 
         # Parse
-        parser = UtteranceTextParser(stemmer, stopwords)
+        parser = UtteranceTextParser(stemmer, stopwordVocab)
         for entry in jsonData:
             utterance = Utterance(entry, self)
             for word in parser.getWords(utterance.text):
@@ -277,10 +280,11 @@ def isEmpty(str):
     return not (str == "" or str == None)
 
 class UtteranceTextParser(object):
-    def __init__(self, stemmer=None, stopwords=None):
+    def __init__(self, stemmer=None, stopwordVocab=None):
         self.regexSent = re.compile(DELIM_SENT)
         self.regexWord = re.compile(DELIM_WORD)
         self.stemmer = stemmer
+        self.stopwordVocab = stopwordVocab
 
     def getWords(self, text):
         textWords = []
@@ -296,9 +300,10 @@ class UtteranceTextParser(object):
                     w = w.lower()
                     w = w.strip("'").strip('-')
                     if w:
-                        if self.stemmer and w.isalpha():
-                            w = stemmer.stem(w,0,len(w)-1)
-                        textWords.append(w)
+                        if self.stopwordVocab is None or self.stopwordVocab.isNotIn(w):
+                            if self.stemmer and w.isalpha():
+                                w = self.stemmer.stem(w,0,len(w)-1)
+                            textWords.append(w)
         return textWords
 
 # PARSER

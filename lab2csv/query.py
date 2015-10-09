@@ -59,7 +59,7 @@ class QueryResult(object):
 
 # QUERY
 class Query(object):
-    def __init__(self, text, collection, stemmer=None, stopwords=None):
+    def __init__(self, text, collection, stemmer=None, stopwordVocab=None):
         self.text = text
         self.collection = collection
         self.results = {}
@@ -70,7 +70,7 @@ class Query(object):
         self.weights = None
 
         # Parse
-        parser = UtteranceTextParser(stemmer, stopwords)
+        parser = UtteranceTextParser(stemmer, stopwordVocab)
         for line in text:
             for word in parser.getWords(line):
                 self.vocab.add(word)

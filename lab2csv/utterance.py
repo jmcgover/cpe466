@@ -85,14 +85,6 @@ class InvertedIndex(object):
 
 # UTTERANCE
 class Utterance(object):
-#    def __init__(self, pid, first, last, personType, text):
-#        self.vocab = Vocabulary()
-#        self.pid = pid
-#        self.first = first
-#        self.last = last
-#        self.personType = personType
-#        self.text = text
-#        self.vector = ''
     def __init__(self, jsonEntry, collection):
         self.__dict__ = jsonEntry
         keys = []
@@ -124,9 +116,9 @@ class Utterance(object):
 
     def calculateNorm(self):
         sumSquares = 0.0
-        for term in self.getWordList():
-            weight = self.collection.tf_idf(term, self)
-            sumSquares += weight * weight
+        weights = self.getWeights()
+        for w in weights:
+            sumSquares += weights[w] * weights[w]
         self.norm = math.sqrt(sumSquares)
     def getNorm(self):
         if not self.norm:
@@ -136,6 +128,11 @@ class Utterance(object):
         self.weights = {}
         for term in self.getWordList():
             self.weights[term] = self.collection.tf_idf(term, self)
+    def getTermWeight(self, term):
+        weights = self.getWeights()
+        if term not in weights:
+            return 0
+        return weights[term]
     def getWeights(self):
         if not self.weights:
             self.calculateWeights()
@@ -151,17 +148,8 @@ class Utterance(object):
 
 
 # UTTERANCE COLLECTION
-#class UtteranceCollection(object):
-#    def __init__(self):
-#        self.vocab = Vocabulary()
-#        self.utterances = []
-#        self.count = 0
-#        self.stem = False
-#        self.stopwords = ''
-#        self.stopwordList = []
-#        self.pickleFile = "SB277_Processed"
 class UtteranceCollection(object):
-    def __init__(self, jsonData, stemmer=None, pickleFilename="SB277_Processed"):
+    def __init__(self, jsonData, stemmer=None, stopwords=None):
         self.index = InvertedIndex()
         self.vocab = Vocabulary()
         self.utterances = []
@@ -169,7 +157,7 @@ class UtteranceCollection(object):
         self.maxFreq = 0
 
         # Parse
-        parser = UtteranceTextParser(stemmer)
+        parser = UtteranceTextParser(stemmer, stopwords)
         for entry in jsonData:
             utterance = Utterance(entry, self)
             for word in parser.getWords(utterance.text):
@@ -188,11 +176,11 @@ class UtteranceCollection(object):
         for doc in self.utterances:
             doc.calculateNorm()
             doc.calculateWeights()
-#            print("%d: %f: " % (doc.pid, doc.getNorm()), end="")
-#            weights = doc.getWeights()
-#            for key in weights.keys():
-#                print("%s:%.2f|" % (key,weights[key]), end="")
-#            print()
+            print("%d: %f: " % (doc.pid, doc.getNorm()), end="")
+            weights = doc.getWeights()
+            for key in weights.keys():
+                print("%s:%.2f|" % (key,weights[key]), end="")
+            print()
 
     def __iter__(self):
         return self.vocab.__iter__()
@@ -240,7 +228,9 @@ class UtteranceCollection(object):
             return 0
         return math.log(float(self.numUtterances) / self.index.getDocumentFrequency(term))
     def tf_idf(self, term, document):
-        return self.termFrequency(term, document) * self.inverseDocumentFrequency(term)
+        tf = self.termFrequency(term, document)
+        idf = self.inverseDocumentFrequency(term)
+        return tf * idf
 
     def generateWeights(self):
         words = self.vocab.getWordList()
@@ -284,7 +274,7 @@ def isEmpty(str):
     return not (str == "" or str == None)
 
 class UtteranceTextParser(object):
-    def __init__(self, stemmer=None):
+    def __init__(self, stemmer=None, stopwords=None):
         self.regexSent = re.compile(DELIM_SENT)
         self.regexWord = re.compile(DELIM_WORD)
         self.stemmer = stemmer

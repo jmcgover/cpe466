@@ -36,9 +36,9 @@ def buildArguments():
          action='store',
          metavar='stopwordfile',
          help='the .txt file containing stopwords to be removed from processing')
-   argParser.add_argument('-q','--queryfile',
+   argParser.add_argument('-q','--query-filename',
          action='store',
-         metavar='queryfile',
+         metavar='query-filename',
          help='the .txt file containing the query')
    return argParser
 
@@ -50,7 +50,6 @@ def argError(msg):
 def main():
    argParser = buildArguments()
    args = argParser.parse_args()
-   queryfile = args.queryfile
    stopwords = args.stopword_file
 
    if args.stem:
@@ -84,21 +83,20 @@ def main():
           if e.errno == errno.ENOENT:
               print('Could not find file %s' % (args.file))
               return errno.ENOENT
-
-      try:
-         pickleFilename = args.filename.replace(".","_") + ".pickle"
-         print("Saving to file %s" % (pickleFilename))
-         with open(pickleFilename, "wb") as outFile:
-            pickle.dump(collection, outFile)
-            print("Save Successful!")
-            print("----------")
-      except OSError as e:
-          if e.errno == errno.ENOENT:
-              print('Could not open file %s' % (args.filename))
-              return errno.ENOENT
+#      try:
+#         pickleFilename = args.filename.replace(".","_") + ".pickle"
+#         print("Saving to file %s" % (pickleFilename))
+#         with open(pickleFilename, "wb") as outFile:
+#            pickle.dump(collection, outFile)
+#            print("Save Successful!")
+#            print("----------")
+#      except OSError as e:
+#          if e.errno == errno.ENOENT:
+#              print('Could not open file %s' % (args.filename))
+#              return errno.ENOENT
 
       return 0
-   elif filename[-7:] == '.pickle' and queryfile is not None:
+   elif args.filename[-7:] == '.pickle' and queryfile is not None:
       print("Opening processed file %s" % (args.file))
       try:
          with open(args.file) as pickleFile:
@@ -108,22 +106,22 @@ def main():
       except:
          print("Something went very wrong")
          return 22
-      if queryfile[-4:] == '.txt':
-         print("Opening query file %s" % (args.queryfile))
-         try:
-            with open(args.queryfile) as qfile:
-               parser = query.QueryParser(qfile, utteranceCollection)
-               parser.parseQuery()
-         except OSError as e:
-             if e.errno == errno.ENOENT:
-                 print('Could not find file %s' % (args.filename))
-                 return errno.ENOENT
-             else:
-                 raise
       return 0
    else:
       print('File issue, make sure you include a queryfile with the .pickle results')
       return errno.EINVAL
+   if args.query_filename[-4:] == '.txt':
+      print("Opening query file %s" % (args.queryfile))
+      try:
+         with open(args.queryfile) as qfile:
+            parser = query.QueryParser(qfile, utteranceCollection)
+            parser.parseQuery()
+      except OSError as e:
+          if e.errno == errno.ENOENT:
+              print('Could not find file %s' % (args.filename))
+              return errno.ENOENT
+          else:
+              raise
 
 if __name__ == '__main__':
     rtn = main()

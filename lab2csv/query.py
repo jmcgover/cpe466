@@ -19,15 +19,60 @@ sys.path.append(os.getcwd())
 import utterance
 from utterance import Vocabulary
 from utterance import Utterance
+from utterance import UtteranceTextParser
 import bisect
 import operator
 
+def cosineSimilarity(d, q):
+    commonTerms = {}
+    for term in d:
+        commonTerms[word] = 1
+    for term in q:
+        commonTerms[word] = 1
+    dotProduct = 0.0
+    for term in commonTerms:
+        dotProduct += d.getTermWeight(term) * q.getTermWeight(term)
+    return dotProduct / (d.getNorm() * q.getNorm())
+
+# QUERY Result
+class QueryResult(object):
+    def __init__(self, d, q):
+        self.document = d
+        self.query = q
+        self.similarity = cosine_similarity(self.document, self.query)
+    def __lt__(self, other):
+        return self.similarity < other.similarity
+    def __gt__(self, other):
+        return self.similarity > other.similarity
+    def __le__(self, other):
+        return self.similarity <= other.similarity
+    def __ge__(self, other):
+        return self.similarity >= other.similarity
+    def getDocument(self):
+        return self.document
+    def getQuery(self):
+        return self.query
+
 # QUERY
 class Query(object):
-    def __init__(self):
-        self.vocab = Vocabulary()
-        self.vector = ''
+    def __init__(self, text, collection, stemmer=None, stopwords=None):
+        self.text = text
+        self.collection = collection
         self.results = {}
+        self.vocab = Vocabulary()
+        self.maxFreq = 0
+
+        self.norm = None
+        self.weights = None
+
+        # Parse
+        parser = UtteranceTextParser(stemmer, stopwords)
+        for line in text:
+            for word in parser.getWords(line):
+                self.vocabulary.add(word)
+        for word in self.getWordList():
+            if self.getWordCount(word) > self.maxFreq:
+                self.maxFreq = self.getWordCount(word)
 
     def __iter__(self):
         return self.vocab.__iter__()
@@ -41,6 +86,38 @@ class Query(object):
     def getWordList(self):
         return self.vocab.getWordList()
 
+    def calculateNorm(self):
+        sumSquares = 0.0
+        for weight in self.getWeights():
+            sumSquares += weight * weight
+        self.norm = math.sqrt(sumSquares)
+    def getNorm(self):
+        if not self.norm:
+            self.calculateNorm()
+        return self.norm
+    def calculateWeights(self):
+        self.weights = {}
+        for term in self.getWordList():
+            tf = self.getWordCount(term)
+            idf = self.collection.inverseDocumentFrequency(term)
+            self.weights[term] = tf * idf
+    def getWeights(self):
+        if not self.weights:
+            self.calculateWeights()
+        return self.weights
+    def getTermWeight(self, term):
+        weights = self.getWeights()
+        if term not in weights:
+            return 0
+        return weights[term]
+    def findResults(self):
+        self.results = []
+        for doc in self.collections.getDocuments():
+            sim = cosineSimilarity(doc, query)
+    def getResults(self):
+        if not results:
+            self.findResults()
+        return self.results
 
 
 # DELIMITERS

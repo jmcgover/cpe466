@@ -34,7 +34,7 @@ def buildArguments():
          metavar='stopwordfile',
          help='the .txt file containing stopwords to be removed from processing')
 
-   return argParser
+    return argParser
 
 def argError(msg):
    if msg:
@@ -82,5 +82,4 @@ def main():
       return 22
 
 if __name__ == '__main__':
-   main()
-
+    main()

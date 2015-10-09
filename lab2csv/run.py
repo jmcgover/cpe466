@@ -17,6 +17,8 @@ import argparse
 
 import utterance
 from utterance import UtteranceCollection
+import query
+from query import Query
 
 DESCRIPTION="CPE 466 Lab 2: Information Retrieval from Digital Democracy."
 
@@ -34,6 +36,10 @@ def buildArguments():
          action='store',
          metavar='stopwordfile',
          help='the .txt file containing stopwords to be removed from processing')
+   argParser.add_argument('-q','--queryfile',
+         action='store',
+         metavar='queryfile',
+         help='the .txt file containing the query')
    return argParser
 
 def argError(msg):
@@ -45,6 +51,7 @@ def main():
    argParser = buildArguments()
    args = argParser.parse_args()
    filename = args.file
+   queryfile = args.queryfile
    stopwords = args.stopwordfile
 
    if args.stem:
@@ -90,7 +97,7 @@ def main():
          return e.errno
 
       return 0
-   elif filename[-7:] == '.pickle':
+   elif filename[-7:] == '.pickle' and queryfile is not None:
       print("Opening processed file %s" % (args.file))
       try:
          with open(args.file) as pickleFile:
@@ -104,10 +111,19 @@ def main():
       except:
          print("Something went very wrong")
          return 22
-
+      if queryfile[-4:] == '.txt':
+         print("Opening query file %s" % (args.queryfile))
+     #    try:
+         if True:
+            with open(args.queryfile) as qfile:
+               parser = query.QueryParser(qfile, utteranceCollection)
+               parser.parseQuery()
+     #    except FileNotFoundError as e:
+     #       print('Could not find file %s' % (args.queryfile))
+     #       return e.errno
       return 0
    else:
-      print('Add support for the stored, processed json.')
+      print('File issue, make sure you include a queryfile with the .pickle results')
       return 22
 
 if __name__ == '__main__':

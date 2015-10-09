@@ -176,17 +176,20 @@ class UtteranceCollection(object):
         for doc in self.utterances:
             doc.calculateNorm()
             doc.calculateWeights()
-            print("%d: %f: " % (doc.pid, doc.getNorm()), end="")
-            weights = doc.getWeights()
-            for key in weights.keys():
-                print("%s:%.2f|" % (key,weights[key]), end="")
-            print()
+#            print("%d: %f: " % (doc.pid, doc.getNorm()), end="")
+#            weights = doc.getWeights()
+#            for key in weights.keys():
+#                print("%s:%.2f|" % (key,weights[key]), end="")
+#            print()
 
     def __iter__(self):
         return self.vocab.__iter__()
 
     def addWord(self, word):
         self.vocab.add(word)
+
+    def getDocuments(self):
+        return self.utterances
 
     def getWordCount(self, word):
         return self.vocab.getWordCount(word)

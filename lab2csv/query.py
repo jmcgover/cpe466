@@ -26,9 +26,9 @@ import operator
 def cosineSimilarity(d, q):
     commonTerms = {}
     for term in d:
-        commonTerms[word] = 1
+        commonTerms[term] = 1
     for term in q:
-        commonTerms[word] = 1
+        commonTerms[term] = 1
     dotProduct = 0.0
     for term in commonTerms:
         dotProduct += d.getTermWeight(term) * q.getTermWeight(term)
@@ -39,19 +39,23 @@ class QueryResult(object):
     def __init__(self, d, q):
         self.document = d
         self.query = q
-        self.similarity = cosine_similarity(self.document, self.query)
+        self.similarity = cosineSimilarity(self.document, self.query)
     def __lt__(self, other):
-        return self.similarity < other.similarity
-    def __gt__(self, other):
         return self.similarity > other.similarity
+    def __gt__(self, other):
+        return self.similarity < other.similarity
     def __le__(self, other):
-        return self.similarity <= other.similarity
-    def __ge__(self, other):
         return self.similarity >= other.similarity
+    def __ge__(self, other):
+        return self.similarity <= other.similarity
+    def __cmp__(self, other):
+        return -1 * (self.similarity - other.similarity)
     def getDocument(self):
         return self.document
     def getQuery(self):
         return self.query
+    def getSimilarity(self):
+        return self.similarity
 
 # QUERY
 class Query(object):
@@ -69,7 +73,7 @@ class Query(object):
         parser = UtteranceTextParser(stemmer, stopwords)
         for line in text:
             for word in parser.getWords(line):
-                self.vocabulary.add(word)
+                self.vocab.add(word)
         for word in self.getWordList():
             if self.getWordCount(word) > self.maxFreq:
                 self.maxFreq = self.getWordCount(word)
@@ -86,10 +90,12 @@ class Query(object):
     def getWordList(self):
         return self.vocab.getWordList()
 
+    # Term Weights
     def calculateNorm(self):
         sumSquares = 0.0
-        for weight in self.getWeights():
-            sumSquares += weight * weight
+        weights = self.getWeights()
+        for w in weights:
+            sumSquares += weights[w] * weights[w]
         self.norm = math.sqrt(sumSquares)
     def getNorm(self):
         if not self.norm:
@@ -110,13 +116,18 @@ class Query(object):
         if term not in weights:
             return 0
         return weights[term]
+
+    # Results
     def findResults(self):
         self.results = []
-        for doc in self.collections.getDocuments():
-            sim = cosineSimilarity(doc, query)
-    def getResults(self):
-        if not results:
+        for doc in self.collection.getDocuments():
+            result = QueryResult(doc, self)
+            bisect.insort(self.results, result)
+    def getResults(self, topK=None):
+        if not self.results:
             self.findResults()
+        if topK:
+            return self.results[:topK]
         return self.results
 
 

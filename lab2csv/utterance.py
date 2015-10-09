@@ -10,6 +10,8 @@ import os
 import re
 import sys
 import json
+import pickle
+
 import stemming
 from stemming import PorterStemmer
 

@@ -8,11 +8,12 @@ from __future__ import print_function
 
 import os
 import sys
+import json
+import pickle
 
 # Custom Libraries
 sys.path.append(os.getcwd())
 import argparse
-import json
 
 import utterance
 from utterance import UtteranceCollection
@@ -33,8 +34,7 @@ def buildArguments():
          action='store',
          metavar='stopwordfile',
          help='the .txt file containing stopwords to be removed from processing')
-
-    return argParser
+   return argParser
 
 def argError(msg):
    if msg:

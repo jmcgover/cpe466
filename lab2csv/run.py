@@ -60,7 +60,7 @@ def main():
    else:
       stopwords = ''
 
-   if filename[-4:] == 'json':
+   if filename[-5:] == '.json':
       utterances = UtteranceCollection()
       try:
          with open(args.file) as raw_data_file:
@@ -76,6 +76,29 @@ def main():
       except FileNotFoundError as e:
          print('Could not find file %s' % (args.file))
          return e.errno
+
+      try:
+         with open(parser.utterances.pickleFile, "wb") as outFile:
+            print("Saving to file %s" % (parser.utterances.pickleFile))
+            pickle.dump(parser.utterances, outFile)
+            print("Save Successful!")
+            print("----------")
+      except FileNotFoundError as e:
+         return e.errno
+
+      return 0
+   elif filename[-7:] == '.pickle':
+      print("Opening processed file %s" % (args.file))
+      try:
+         with open(args.file) as pickleFile:
+            utteranceCollection = pickle.load(pickleFile)
+            print("Load Successful!")
+       #     print(utteranceCollection.count)
+            print("----------")
+      except:
+         print("Something went very wrong")
+         return 22
+
       return 0
    else:
       print('Add support for the stored, processed json.')

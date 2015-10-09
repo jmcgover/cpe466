@@ -10,7 +10,6 @@ import os
 import re
 import sys
 import json
-import pickle
 
 import stemming
 from stemming import PorterStemmer
@@ -94,6 +93,10 @@ class UtteranceCollection(object):
         self.vocab = Vocabulary()
         self.utterances = []
         self.count = 0
+        self.stem = False
+        self.stopwords = ''
+        self.stopwordList = []
+        self.pickleFile = "SB277_Processed"
 
     def __iter__(self):
         return self.vocab.__iter__()
@@ -150,27 +153,28 @@ def isEmpty(str):
 class Parser(object):
     def __init__(self, file, stem, stopwords, utterances):
         self.file = file
-        self.stem = stem
         self.utterances = utterances
-        self.stopwords = stopwords
-        self.stopwordList = []
-        self.vocab = Vocabulary()
-#        print('Building a parser!') #TODO REMOVE
+        self.utterances.stem = stem
+        self.utterances.stopwords = stopwords
+        self.utterances.stopwordList = []
+        self.utterances.pickleFile = "SB277_Processed"
+#        self.vocab = Vocabulary()
+        print('Building a parser!') #TODO REMOVE
 
     def parseUtterance(self):
-        if self.stopwords != '':
+        if self.utterances.stopwords != '':
             try:
-               with open(self.stopwords) as stopword_file:
-                  print('Processing stopword file: %s' % (self.stopwords))
+               with open(self.utterances.stopwords) as stopword_file:
+                  print('Processing stopword file: %s' % (self.utterances.stopwords))
                   for line in stopword_file:
                       line = line.strip()
                       line = line.lower()
-                      self.stopwordList.append(line)
+                      self.utterances.stopwordList.append(line)
             except FileNotFoundError as e:
-               print('Could not find file %s' % (self.stopwords))
+               print('Could not find file %s' % (self.utterances.stopwords))
                return e.errno
         data = json.load(self.file)
-        if self.stem == True:
+        if self.utterances.stem == True:
             stemmer = PorterStemmer()
         for item in data:
             newUtter = Utterance(item["pid"], item["first"], item["last"], item["PersonType"], item["text"])
@@ -189,8 +193,8 @@ class Parser(object):
                         w = w.lower()
                         w = w.strip("'").strip('-')
                         newWord = ''
-                        if w and w not in self.stopwordList:
-                            if self.stem == True and w.isalpha():
+                        if w and w not in self.utterances.stopwordList:
+                            if self.utterances.stem == True and w.isalpha():
                                 newWord += stemmer.stem(w,0,len(w)-1)
                             else:
                                newWord += w
@@ -199,5 +203,11 @@ class Parser(object):
             self.utterances.addUtterance(newUtter)
         # debug prints!!!
    #     self.utterances.printAllWordsFreq()
+        if self.utterances.stopwords != '':
+            self.utterances.pickleFile += '_' + self.utterances.stopwords[:-4]
+        if self.utterances.stem == True:
+            self.utterances.pickleFile += '_stemmed'
+        self.utterances.pickleFile += '.pickle'
+
         return None
 

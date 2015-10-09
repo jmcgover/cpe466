@@ -14,3 +14,16 @@
                   ##::::::: ##.... ##: ##:::: ##:::: ##::::::::
                   ########: ##:::: ##: ########::::: #########:
                  ........::..:::::..::........::::::.........::
+Information Retrival from the SB277 hearings via DigitalDemocracy
+(http://www.digitaldemocracy.org/bill/201520160SB277).
+
+Jeff McGovern - jmcgover@calpoly.edu
+Nicole Martin - nlmartin@calpoly.edu
+
+To show usage and all supported arguments, run the following on the command line: 
+./run.py -h
+
+Processing and querying is a 2-step process via run.py
+1) supply the utterances JSON with or without stemming and stopword options
+2) use the pickle file produced in step 1 with a query.txt to retrieve info
+

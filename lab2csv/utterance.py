@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import json
+import math
 
 import stemming
 from stemming import PorterStemmer
@@ -54,17 +55,14 @@ class Vocabulary(object):
 
 # UTTERANCE
 class Utterance(object):
-#    def __init__(self, pid, first, last, personType, date, house, committee, text):
     def __init__(self, pid, first, last, personType, text):
         self.vocab = Vocabulary()
         self.pid = pid
         self.first = first
         self.last = last
         self.personType = personType
-#        self.date = date
-#        self.house = house
-#        self.committee = committee
         self.text = text
+        self.vector = ''
 
     def __iter__(self):
         return self.vocab.__iter__()
@@ -75,12 +73,7 @@ class Utterance(object):
     def getWordCount(self, word):
         return self.vocab.getWordCount(word)
 
-    def getNumTotalWords(self):
-        return self.vocab.getNumTotalWords()
-
-    def getNumDifferentWords(self):
-        return self.vocab.getNumDifferentWords()
-
+# TODO finish this to handle the dupes in the JSON file
     def compareUtterances(self, other):
         if self.pid == otherUtter.pid:
            if self.text == other.text:
@@ -123,9 +116,35 @@ class UtteranceCollection(object):
 
     def printAllWordsFreq(self):
         words = self.vocab.getWordList()
-        print(words)
+#        print(words)
         for w in words:
             print("%s: %d" % (w , self.vocab.getWordCount(w)))
+
+    def generateWeights(self):
+        words = self.vocab.getWordList()
+#        print(words)
+        for w in words:
+            wordCount = self.getWordCount(w)
+            idf = math.log((self.count/float(wordCount)),2)
+            maxFreq = 0.0
+            for utter in self.utterances:
+                freq = utter.getWordCount(w)
+                if freq > maxFreq:
+                    maxFreq = float(freq)
+
+            for utter in self.utterances:
+                if utter.vector != '':
+                    utter.vector += ','
+                if utter.getWordCount(w) == 0:
+                    utter.vector += '0'
+                #    utter.vector += '' # sparse vector option
+                else:
+                    weight = ((utter.getWordCount(w))/maxFreq) * idf
+                    utter.vector += str(weight)
+
+    def printAllWeightVectors(self):
+        for utter in self.utterances:
+            print(utter.vector)
 
 
 
@@ -159,7 +178,7 @@ class Parser(object):
         self.utterances.stopwordList = []
         self.utterances.pickleFile = "SB277_Processed"
 #        self.vocab = Vocabulary()
-        print('Building a parser!') #TODO REMOVE
+#        print('Building a parser!') #TODO REMOVE
 
     def parseUtterance(self):
         if self.utterances.stopwords != '':
@@ -199,7 +218,8 @@ class Parser(object):
                             else:
                                newWord += w
                             newUtter.addWord(newWord)
-                            self.utterances.addWord(newWord)
+                            if newUtter.getWordCount(newWord) == 1:
+                               self.utterances.addWord(newWord)
             self.utterances.addUtterance(newUtter)
         # debug prints!!!
    #     self.utterances.printAllWordsFreq()

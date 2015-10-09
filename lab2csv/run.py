@@ -72,6 +72,9 @@ def main():
      #          print("PersonType: %s \t Text: %s" % (item["PersonType"], item["text"]))
      #          print(item["text"])
             print('Done!')
+            print('Generating weights...')
+            parser.utterances.generateWeights()
+            print('Done!')
             print("----------")
       except FileNotFoundError as e:
          print('Could not find file %s' % (args.file))
@@ -95,6 +98,9 @@ def main():
             print("Load Successful!")
        #     print(utteranceCollection.count)
             print("----------")
+       #     print(utteranceCollection.printAllWordsFreq())
+       #     print(utteranceCollection.vocab.getWordList())
+       #     utteranceCollection.printAllWeightVectors()
       except:
          print("Something went very wrong")
          return 22

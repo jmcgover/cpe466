@@ -6,15 +6,15 @@
 
 from __future__ import print_function
 
-import os
-import sys
+import errno
 import json
+import os
 import pickle
+import sys
 
 # Custom Libraries
 sys.path.append(os.getcwd())
 import argparse
-
 import utterance
 from utterance import UtteranceCollection
 import query
@@ -24,15 +24,15 @@ DESCRIPTION="CPE 466 Lab 2: Information Retrieval from Digital Democracy."
 
 def buildArguments():
    argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION)
-   argParser.add_argument('-f','--file',
+   argParser.add_argument('-f','--filename',
          action='store',
-         metavar='file',
-         help='the file to be parsed, appended with .json for JSON and .???? for the ???',
+         metavar='filename',
+         help='the file to be parsed, appended with .json for JSON',
          required=True)
    argParser.add_argument('-s', '--stem',
          action='store_true',
          help='stems the text of the file to be parsed')
-   argParser.add_argument('-sf','--stopwordfile',
+   argParser.add_argument('-w','--stopword-file',
          action='store',
          metavar='stopwordfile',
          help='the .txt file containing stopwords to be removed from processing')
@@ -50,9 +50,8 @@ def argError(msg):
 def main():
    argParser = buildArguments()
    args = argParser.parse_args()
-   filename = args.file
    queryfile = args.queryfile
-   stopwords = args.stopwordfile
+   stopwords = args.stopword_file
 
    if args.stem:
        stem = True
@@ -63,38 +62,40 @@ def main():
    if stopwords != '' and stopwords is not None:
       if stopwords[-4:] != '.txt':
          print('Wrong stopword file format')
-         return 22
+         return errno.EINVAL
    else:
       stopwords = ''
 
-   if filename[-5:] == '.json':
-      utterances = UtteranceCollection()
+   if args.filename[-5:] == '.json':
+      collection = None
       try:
-         with open(args.file) as raw_data_file:
-            print('Processing JSON Utterances file: %s' % (args.file))
-     #       data = json.load(raw_data_file)
-            parser = utterance.Parser(raw_data_file, stem, stopwords, utterances)
-            parser.parseUtterance()
-     #       for item in data:
-     #          print("PersonType: %s \t Text: %s" % (item["PersonType"], item["text"]))
-     #          print(item["text"])
-            print('Done!')
-            print('Generating weights...')
-            parser.utterances.generateWeights()
+         with open(args.filename) as raw_data_file:
+            print('Processing JSON Utterances file: %s' % (args.filename))
+            jsonData = None
+            try:
+                jsonData = json.load(raw_data_file)
+            except ValueError as err:
+                print("failed to open JSON file")
+                return errno.EINVAL
+            collection = UtteranceCollection(jsonData)
             print('Done!')
             print("----------")
-      except FileNotFoundError as e:
-         print('Could not find file %s' % (args.file))
-         return e.errno
+      except OSError as e:
+          if e.errno == errno.ENOENT:
+              print('Could not find file %s' % (args.file))
+              return errno.ENOENT
 
       try:
-         with open(parser.utterances.pickleFile, "wb") as outFile:
-            print("Saving to file %s" % (parser.utterances.pickleFile))
-            pickle.dump(parser.utterances, outFile)
+         pickleFilename = args.filename.replace(".","_") + ".pickle"
+         print("Saving to file %s" % (pickleFilename))
+         with open(pickleFilename, "wb") as outFile:
+            pickle.dump(collection, outFile)
             print("Save Successful!")
             print("----------")
-      except FileNotFoundError as e:
-         return e.errno
+      except OSError as e:
+          if e.errno == errno.ENOENT:
+              print('Could not open file %s' % (args.filename))
+              return errno.ENOENT
 
       return 0
    elif filename[-7:] == '.pickle' and queryfile is not None:
@@ -103,28 +104,27 @@ def main():
          with open(args.file) as pickleFile:
             utteranceCollection = pickle.load(pickleFile)
             print("Load Successful!")
-       #     print(utteranceCollection.count)
             print("----------")
-       #     print(utteranceCollection.printAllWordsFreq())
-       #     print(utteranceCollection.vocab.getWordList())
-       #     utteranceCollection.printAllWeightVectors()
       except:
          print("Something went very wrong")
          return 22
       if queryfile[-4:] == '.txt':
          print("Opening query file %s" % (args.queryfile))
-     #    try:
-         if True:
+         try:
             with open(args.queryfile) as qfile:
                parser = query.QueryParser(qfile, utteranceCollection)
                parser.parseQuery()
-     #    except FileNotFoundError as e:
-     #       print('Could not find file %s' % (args.queryfile))
-     #       return e.errno
+         except OSError as e:
+             if e.errno == errno.ENOENT:
+                 print('Could not find file %s' % (args.filename))
+                 return errno.ENOENT
+             else:
+                 raise
       return 0
    else:
       print('File issue, make sure you include a queryfile with the .pickle results')
-      return 22
+      return errno.EINVAL
 
 if __name__ == '__main__':
-    main()
+    rtn = main()
+    exit(rtn)

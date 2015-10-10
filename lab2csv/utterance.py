@@ -104,6 +104,14 @@ class Utterance(object):
 
     def __iter__(self):
         return self.vocab.__iter__()
+    def __hash__(self):
+        return hash((self.pid, self.last, self.first, self.date, self.text))
+    def __eq__(self, other):
+        return self.pid == other.pid\
+                and self.last == other.last\
+                and self.first == other.first\
+                and self.date == other.date\
+                and self.text == other.text
 
     def addWord(self, word):
         self.vocab.add(word)
@@ -152,29 +160,71 @@ class Utterance(object):
 
 # UTTERANCE COLLECTION
 class UtteranceCollection(object):
-    def __init__(self, jsonData, stemmer=None, stopwordVocab=None):
+    def __init__(self, jsonData, stemmer=None, stopwordVocab=None, dedup=False, metadata=False):
         self.index = InvertedIndex()
         self.vocab = Vocabulary()
-        self.utterances = []
+        self.utterances = {}
         self.numUtterances = 0
         self.maxFreq = 0
+        if metadata: 
+            print("METADATA: Incorporating metadata")
+        if dedup: 
+            print("DEDUP: Deduplicating documents")
 
         # Parse
-        parser = UtteranceTextParser(stemmer, stopwordVocab)
+        self.parser = UtteranceTextParser(stemmer, stopwordVocab)
         for entry in jsonData:
             utterance = Utterance(entry, self)
-            for word in parser.getWords(utterance.text):
+            for word in self.parser.getWords(utterance.text):
                 utterance.addWord(word)
                 self.vocab.add(word)
-            for word in utterance.getWordList():
-                self.index.add(word)
-                if utterance.getWordCount(word) > self.maxFreq:
-                    self.maxFreq = utterance.getWordCount(word)
-            self.utterances.append(utterance)
-            self.numUtterances += 1
+            if dedup:
+                if utterance not in self.utterances:
+                    if metadata:
+                        for key in utterance.getJSONKeys():
+                            if not isinstance(utterance.__dict__[key],(int, long, float, complex)):
+                                utterance.addWord(utterance.__dict__[key].lower())
+                    for word in utterance.getWordList():
+                        self.index.add(word)
+                        if utterance.getWordCount(word) > self.maxFreq:
+                            self.maxFreq = utterance.getWordCount(word)
+                    self.utterances[utterance] = utterance
+                    self.numUtterances += 1
+                elif metadata:
+                    newlyAddedVocab = Vocabulary()
+                    oldUtterance = self.utterances[utterance]
+                    oldKeys = oldUtterance.getJSONKeys();
+                    newKeys = utterance.getJSONKeys();
+                    for key in newKeys:
+                        if key not in oldKeys:
+                            oldUtterance[key] = utterance[key]
+                    for key in oldKeys:
+                        if oldUtterance.__dict__[key] != utterance.__dict__[key]\
+                                and isinstance(utterance.__dict__[key],basestring)\
+                                and utterance.__dict__[key].isalpha():
+                            for word in self.parser.getWords(utterance.__dict__[key]):
+                                oldUtterance.addWord(word)
+                                self.vocab.add(word)
+                                newlyAddedVocab.add(word)
+                    for word in newlyAddedVocab:
+                        self.index.add(word)
+                        if oldUtterance.getWordCount(word) > self.maxFreq:
+                            self.maxFreq = oldUtterance.getWordCount(word)
+            else:
+                for word in utterance.getWordList():
+                    self.index.add(word)
+                    if utterance.getWordCount(word) > self.maxFreq:
+                            self.maxFreq = utterance.getWordCount(word)
+                    self.utterances[utterance] = utterance
+                    self.numUtterances += 1
+                if metadata:
+                    for key in utterance.getJSONKeys():
+                        if not isinstance(utterance.__dict__[key],(int, long, float, complex)):
+                            for word in self.parser.getWords(utterance.__dict__[key]):
+                                utterance.addWord(word)
+                                self.vocab.add(word)
 
-        print("Num Total Words    : %d" % self.vocab.getNumTotalWords())
-        print("Num Different Words: %d" % self.vocab.getNumDifferentWords())
+
         print("Calculating weights...")
         for doc in self.utterances:
             doc.calculateNorm()
@@ -238,30 +288,17 @@ class UtteranceCollection(object):
         idf = self.inverseDocumentFrequency(term)
         return tf * idf
 
-    def generateWeights(self):
-        words = self.vocab.getWordList()
-        for w in words:
-            wordCount = self.getWordCount(w)
-            idf = math.log((self.numUtterances/float(wordCount)),2)
-            maxFreq = 0.0
-            for utter in self.utterances:
-                freq = utter.getWordCount(w)
-                if freq > maxFreq:
-                    maxFreq = float(freq)
-
-            for utter in self.utterances:
-                if utter.vector != '':
-                    utter.vector += ','
-                if utter.getWordCount(w) == 0:
-                    utter.vector += '0'
-                #    utter.vector += '' # sparse vector option
-                else:
-                    weight = ((utter.getWordCount(w))/maxFreq) * idf
-                    utter.vector += str(weight)
-
     def printAllWeightVectors(self):
         for utter in self.utterances:
             print(utter.vector)
+
+    def printStatistics(self, string):
+        for w in self.parser.getWords(string):
+            print("Global Stats")
+            print("Word: %s" % w)
+            print("TF  : %d" % self.getWordCount(w))
+            print("IDF : %.3f" % self.inverseDocumentFrequency(w))
+
 
 # DELIMITERS
 DELIM_SENT = "\.|!|\?"
@@ -305,65 +342,3 @@ class UtteranceTextParser(object):
                                 w = self.stemmer.stem(w,0,len(w)-1)
                             textWords.append(w)
         return textWords
-
-# PARSER
-class Parser(object):
-    def __init__(self, file, stem, stopwords, utterances):
-        self.file = file
-        self.utterances = utterances
-        self.utterances.stem = stem
-        self.utterances.stopwords = stopwords
-        self.utterances.stopwordList = []
-        self.utterances.pickleFile = "SB277_Processed"
-
-    def parseUtterance(self):
-        if self.utterances.stopwords != '':
-            try:
-               with open(self.utterances.stopwords) as stopword_file:
-                  print('Processing stopword file: %s' % (self.utterances.stopwords))
-                  for line in stopword_file:
-                      line = line.strip()
-                      line = line.lower()
-                      self.utterances.stopwordList.append(line)
-            except FileNotFoundError as e:
-               print('Could not find file %s' % (self.utterances.stopwords))
-               return e.errno
-        data = json.load(self.file)
-        if self.utterances.stem == True:
-            stemmer = PorterStemmer()
-        for item in data:
-            newUtter = Utterance(item["pid"], item["first"], item["last"], item["PersonType"], item["text"])
-            line = item["text"]
-
-            if line != "\n":
-                line = line.strip()
-                punctMarks = regexSent.findall(line)
-                sentences = regexSent.split(line)
-                sentences = filter(None, sentences)
-                for s in sentences:
-                    s = s.strip()
-                    words = regexWord.split(s)
-                    words = filter(None, words)
-                    for w in words:
-                        w = w.lower()
-                        w = w.strip("'").strip('-')
-                        newWord = ''
-                        if w and w not in self.utterances.stopwordList:
-                            if self.utterances.stem == True and w.isalpha():
-                                newWord += stemmer.stem(w,0,len(w)-1)
-                            else:
-                               newWord += w
-                            newUtter.addWord(newWord)
-                            if newUtter.getWordCount(newWord) == 1:
-                               self.utterances.addWord(newWord)
-            self.utterances.addUtterance(newUtter)
-        # debug prints!!!
-   #     self.utterances.printAllWordsFreq()
-        if self.utterances.stopwords != '':
-            self.utterances.pickleFile += '_' + self.utterances.stopwords[:-4]
-        if self.utterances.stem == True:
-            self.utterances.pickleFile += '_stemmed'
-        self.utterances.pickleFile += '.pickle'
-
-        return None
-

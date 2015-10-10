@@ -25,6 +25,8 @@ from stemming import PorterStemmer
 import query
 from query import Query
 
+WIDTH=100
+INDENT=4
 DESCRIPTION="CPE 466 Lab 2: Information Retrieval from Digital Democracy."
 DEF_TOP = 10
 def buildArguments():
@@ -50,6 +52,16 @@ def buildArguments():
             const=DEF_TOP,
             metavar='num',
             help='displays the top num results (default is %d)' % DEF_TOP)
+    argParser.add_argument('-d', '--dedup',
+            action='store_true',
+            help='deduplicates utterances based off of pid, first last name, date, and text')
+    argParser.add_argument('-m', '--metadata',
+            action='store_true',
+            help='treats metadata as included text')
+    argParser.add_argument('-W','--word',
+            action='store',
+            metavar='word1,word2,...',
+            help='comma-separated list of words ')
     return argParser
 
 def argError(msg):
@@ -103,7 +115,7 @@ def main():
             if e.errno == errno.ENOENT:
                 print('Could not find file %s' % (args.file))
                 return errno.ENOENT
-        collection = UtteranceCollection(jsonData, stemmer=stemmer, stopwordVocab=stopwordVocab)
+        collection = UtteranceCollection(jsonData, stemmer=stemmer, stopwordVocab=stopwordVocab, dedup=args.dedup, metadata=args.metadata)
         print('Done!')
         print("----------")
 #        if args.pickle:
@@ -136,10 +148,11 @@ def main():
         # TOP RESULTS
         topResultNum = int(args.top) if args.top else DEF_TOP
         queryText = None
-        print("Opening query file %s" % (args.query_filename))
+        # OPEN QUERY FILE
+        print("Opening query file: %s" % (args.query_filename))
         try:
             with open(args.query_filename) as qfile:
-                queryText = qfile.readlines()
+                queryText = qfile.read().replace("\n", " ").strip()
         except OSError as e:
             if e.errno == errno.ENOENT:
                 print('Could not find file %s' % (args.filename))
@@ -148,16 +161,30 @@ def main():
                 raise
         query = Query(queryText, collection, stemmer=stemmer, stopwordVocab=stopwordVocab)
         print("Finding documents related to:")
-        print("%s" % queryText)
+        print('~' * WIDTH)
+        dedented_text = textwrap.dedent(queryText).strip()
+        print(textwrap.fill(dedented_text, initial_indent='    ', subsequent_indent='    ', width = 100))
         query.findResults()
+        print('~' * WIDTH)
         print("Finding top %s results" % topResultNum)
+        print('~' * WIDTH)
         i = 1
         for res in query.getResults(topResultNum):
-
-            resultStr = "%-2d|%.3f\t%d\t%s" % (i, res.getSimilarity(), res.getDocument().pid, res.getDocument().text)
+            doc = res.getDocument()
+            resultStr = "%-2d|%.3f\tpid:%d\tperson:%s" % \
+                (i, res.getSimilarity(), doc.pid, doc.PersonType)
             print(resultStr)
+            print('~' * WIDTH)
+            dedented_text = textwrap.dedent(doc.text).strip()
+            print(textwrap.fill(dedented_text, initial_indent=' ' * INDENT, subsequent_indent=' ' * INDENT, width = WIDTH))
+            print('~' * WIDTH)
             i += 1
-
+    if args.word:
+        print("----------")
+        collection.printStatistics(args.word)
+        print("----------")
+        query.printStatistics(args.word)
+        print("----------")
 if __name__ == '__main__':
     rtn = main()
     exit(rtn)

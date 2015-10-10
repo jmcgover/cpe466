@@ -70,10 +70,9 @@ class Query(object):
         self.weights = None
 
         # Parse
-        parser = UtteranceTextParser(stemmer, stopwordVocab)
-        for line in text:
-            for word in parser.getWords(line):
-                self.vocab.add(word)
+        self.parser = UtteranceTextParser(stemmer, stopwordVocab)
+        for word in self.parser.getWords(text):
+            self.vocab.add(word)
         for word in self.getWordList():
             if self.getWordCount(word) > self.maxFreq:
                 self.maxFreq = self.getWordCount(word)
@@ -116,6 +115,13 @@ class Query(object):
         if term not in weights:
             return 0
         return weights[term]
+    def printStatistics(self, string):
+        for w in self.parser.getWords(string):
+            print("Query Stats")
+            print("Word: %s"   % w)
+            print("TF  : %d"   % self.getWordCount(w))
+            print("IDF : %.3f" % self.collection.inverseDocumentFrequency(w))
+            print("WGHT: %.3f" % self.getTermWeight(w))
 
     # Results
     def findResults(self):

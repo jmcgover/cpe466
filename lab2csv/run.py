@@ -36,6 +36,9 @@ def buildArguments():
             metavar='filename',
             help='the file to be parsed, appended with .json for JSON',
             required=True)
+    argParser.add_argument('-p', '--pickle',
+            action='store_true',
+            help='saves the parsed collection to the original filename.pickle')
     argParser.add_argument('-s', '--stem',
             action='store_true',
             help='stems the text of the file to be parsed')
@@ -88,7 +91,7 @@ def main():
             print('Wrong stopword file format: please provide a .txt file')
             return errno.EINVAL
         try:
-            with open(args.filename) as raw_data_file:
+            with open(args.stopword_filename) as raw_data_file:
                 print('Building stopword vocabulary: %s' % (args.stopword_filename))
                 stopwordList = raw_data_file.readlines()
         except OSError as e:
@@ -97,7 +100,9 @@ def main():
                 return errno.ENOENT
         stopwordVocab = Vocabulary()
         for w in stopwordList:
-            stopwordVocab.add(w)
+            stopwordVocab.add(w.strip())
+        print('Done!')
+        print("----------")
 
     # COLLECTION CREATION
     collection = None
@@ -115,25 +120,29 @@ def main():
             if e.errno == errno.ENOENT:
                 print('Could not find file %s' % (args.file))
                 return errno.ENOENT
-        collection = UtteranceCollection(jsonData, stemmer=stemmer, stopwordVocab=stopwordVocab, dedup=args.dedup, metadata=args.metadata)
+        collection = UtteranceCollection(\
+                jsonData, stemmer=stemmer, stopwordVocab=stopwordVocab, \
+                dedup=args.dedup, metadata=args.metadata)
         print('Done!')
         print("----------")
-#        if args.pickle:
-#            try:
-#                pickleFilename = args.filename.replace(".","_") + ".pickle"
-#                print("Saving to file %s" % (pickleFilename))
-#                with open(pickleFilename, "wb") as outFile:
-#                    pickle.dump(collection, outFile)
-#                    print("Save Successful!")
-#                    print("----------")
-#            except OSError as e:
-#                if e.errno == errno.ENOENT:
-#                    print('Could not open file %s' % (args.filename))
-#                    return errno.ENOENT
-    elif args.filename[-7:] == '.pickle' and queryfile is not None:
-        print("Opening processed file %s" % (args.file))
+        # PICKLE THE COLLECTION
+        if args.pickle:
+            try:
+                pickleFilename = args.filename.replace(".","_") + ".pickle"
+                print("Saving to file %s" % (pickleFilename))
+                with open(pickleFilename, "wb") as outFile:
+                    pickle.dump(collection, outFile)
+                    print("Save Successful!")
+                    print("----------")
+            except OSError as e:
+                if e.errno == errno.ENOENT:
+                    print('Could not open file %s' % (args.filename))
+                    return errno.ENOENT
+    elif args.filename[-7:] == '.pickle':
+        # OPEN FROM PICKLED FILE
+        print("Opening processed file %s" % (args.filename))
         try:
-            with open(args.file) as pickleFile:
+            with open(args.filename) as pickleFile:
                 collection = pickle.load(pickleFile)
                 print("Load Successful!")
                 print("----------")

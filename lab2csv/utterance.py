@@ -172,7 +172,7 @@ class UtteranceCollection(object):
             print("DEDUP: Deduplicating documents")
 
         # Parse
-        self.parser = UtteranceTextParser(stemmer, stopwordVocab)
+        self.parser = UtteranceTextParser(stemmer=stemmer, stopwordVocab=stopwordVocab)
         for entry in jsonData:
             utterance = Utterance(entry, self)
             for word in self.parser.getWords(utterance.text):
@@ -337,7 +337,7 @@ class UtteranceTextParser(object):
                     w = w.lower()
                     w = w.strip("'").strip('-')
                     if w:
-                        if self.stopwordVocab is None or self.stopwordVocab.isNotIn(w):
+                        if self.stopwordVocab is None or self.stopwordVocab.getWordCount(w) == 0:
                             if self.stemmer and w.isalpha():
                                 w = self.stemmer.stem(w,0,len(w)-1)
                             textWords.append(w)

@@ -191,7 +191,7 @@ class UtteranceCollection(object):
                             self.maxFreq = utterance.getWordCount(word)
                     self.utterances[utterance] = utterance
                     self.numUtterances += 1
-                elif metadata:
+                else:
                     newlyAddedVocab = Vocabulary()
                     oldUtterance = self.utterances[utterance]
                     oldKeys = oldUtterance.getJSONKeys();
@@ -204,14 +204,16 @@ class UtteranceCollection(object):
                                 and isinstance(utterance.__dict__[key],basestring)\
                                 and utterance.__dict__[key].isalpha():
                             oldUtterance.__dict__[key] += "," + utterance.__dict__[key]
-                            for word in self.parser.getWords(utterance.__dict__[key]):
-                                oldUtterance.addWord(word)
-                                self.vocab.add(word)
-                                newlyAddedVocab.add(word)
-                    for word in newlyAddedVocab:
-                        self.index.add(word)
-                        if oldUtterance.getWordCount(word) > self.maxFreq:
-                            self.maxFreq = oldUtterance.getWordCount(word)
+                            if metadata:
+                                for word in self.parser.getWords(utterance.__dict__[key]):
+                                    oldUtterance.addWord(word)
+                                    self.vocab.add(word)
+                                    newlyAddedVocab.add(word)
+                    if metadata:
+                        for word in newlyAddedVocab:
+                            self.index.add(word)
+                            if oldUtterance.getWordCount(word) > self.maxFreq:
+                                self.maxFreq = oldUtterance.getWordCount(word)
             else:
                 # NO DEDUP
                 for word in utterance.getWordList():

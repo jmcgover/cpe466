@@ -179,6 +179,7 @@ class UtteranceCollection(object):
                 utterance.addWord(word)
                 self.vocab.add(word)
             if dedup:
+                # DEDUP
                 if utterance not in self.utterances:
                     if metadata:
                         for key in utterance.getJSONKeys():
@@ -202,6 +203,7 @@ class UtteranceCollection(object):
                         if oldUtterance.__dict__[key] != utterance.__dict__[key]\
                                 and isinstance(utterance.__dict__[key],basestring)\
                                 and utterance.__dict__[key].isalpha():
+                            oldUtterance.__dict__[key] += "," + utterance.__dict__[key]
                             for word in self.parser.getWords(utterance.__dict__[key]):
                                 oldUtterance.addWord(word)
                                 self.vocab.add(word)
@@ -211,6 +213,7 @@ class UtteranceCollection(object):
                         if oldUtterance.getWordCount(word) > self.maxFreq:
                             self.maxFreq = oldUtterance.getWordCount(word)
             else:
+                # NO DEDUP
                 for word in utterance.getWordList():
                     self.index.add(word)
                     if utterance.getWordCount(word) > self.maxFreq:
@@ -229,11 +232,6 @@ class UtteranceCollection(object):
         for doc in self.utterances:
             doc.calculateNorm()
             doc.calculateWeights()
-#            print("%d: %f: " % (doc.pid, doc.getNorm()), end="")
-#            weights = doc.getWeights()
-#            for key in weights.keys():
-#                print("%s:%.2f|" % (key,weights[key]), end="")
-#            print()
 
     def __iter__(self):
         return self.vocab.__iter__()

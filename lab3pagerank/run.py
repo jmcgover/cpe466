@@ -21,7 +21,8 @@ from graph import Parser
 
 WIDTH=100
 INDENT=4
-DESCRIPTION="CPE 466 Lab 3: PageRank."
+DESCRIPTION  = 'CPE 466 Lab 3: PageRank.'
+DESCRIPTION += ''
 
 def buildPageRankArgs():
     argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION)

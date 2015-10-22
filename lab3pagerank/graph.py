@@ -56,6 +56,14 @@ class Parser(object):
             raise  IOError('File is not readable. Please ensure that it is open.')
         if not self.graph:
             self.graph = Graph()
+        if self.txt:
+            # TXT Parsing goes here
+            for line in self.file:
+                tuple = self._getTupleCSV(line)
+                a = tuple[0]
+                b = tuple[1]
+                self.graph.addEdge(a, True, b)
+                self.graph.addEdge(b, True, a)
         if self.csv:
             # CSV Parsing goes here
             for line in self.file:
@@ -78,6 +86,15 @@ class Parser(object):
             # self.graph = read_gml
             print('Parsing GML..')
         return self.graph
+    def _getTupleTXT(self, line):
+        tuple = None
+        if line:
+            self.linesParsed += 1
+            if line[0] not in self.commentChars:
+                line = line.strip()
+                tuple = line.split()
+                for i in range(0, len(tuple)):
+                    tuple[i] = tuple[i].strip().strip('"')
     def _getTupleCSV(self, line):
         tuple = None
         if line:

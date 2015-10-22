@@ -39,6 +39,10 @@ def buildPageRankArgs():
             action='store_true',
             default=False,
             help='forces Graph Markup Language file interpretation')
+    group.add_argument('-t', '--txt',
+            action='store_true',
+            default=False,
+            help='forces White-Space Separated file interpretation')
     return argParser
 
 def main():

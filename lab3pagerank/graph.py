@@ -10,14 +10,28 @@ class Graph(object):
     def __init__(self):
         self.nodes = {}
         self.edges = []
+        self.nodeList = []
+    def __iter__(self):
+        return self.nodeList.__iter__()
+    def __str__(self):
+        str = "{"
+        for n in self:
+            str += "%s" % n
+        str += "}"
+        return str
 
     def addEdge(self, node, edgeLabel, neighbor):
         if node not in self.nodes:
-            self.nodes[node] = {}
+            newNode = Node(node)
+            self.nodes[node] = newNode
+            bisect.insort(self.nodeList, newNode)
+            print("UGH: %s" % newNode)
         self.nodes[node].addEdge(neighbor, edgeLabel)
         self.edges.append(Edge(node, edgeLabel, neighbor))
     def containsNode(self, node):
         return node in self.nodes
+    def getNodeList(self):
+        return self.nodeList
 
 class Parser(object):
     commentChars = {'#' : True}
@@ -68,20 +82,40 @@ class Parser(object):
                 line = line.strip()
                 print(line)
                 tuple = line.split(',')
+                for i in range(0, len(tuple)):
+                    tuple[i] = tuple[i].strip().strip('"')
         return tuple
 
 class Node(object):
     def __init__(self, label):
         self.label = label
         self.edges = {}
-        self.neighbors = []
+        self.neighborList = []
+
+    def __cmp__(self, other):
+        return self.label.__cmp__(other.label)
+
+    def __lt__(self, other):
+        return self.label.__lt__(other.label)
+
+    def __str__(self):
+        str = "{%s: " % self.label
+        first = True
+        for e in self.neighborList:
+            if first:
+                str  += '{%s: %s}' % (e, self.edges[e])
+            else:
+                str  += ',{%s: %s}' % (e, self.edges[e])
+        str += "}"
+        return str
 
     def hash(self):
         return self.label.hash()
 
     def addEdge(self, neighbor, edgeLabel):
-        bisect.insort(self.neighbors, neighbor)
-        self.edges[neighbor] = edgeLabel
+        if neighbor not in  self.edges:
+            bisect.insort(self.neighborList, neighbor)
+            self.edges[neighbor] = edgeLabel
 
     def getLabel(self):
         return self.label

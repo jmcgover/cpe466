@@ -66,6 +66,9 @@ def main():
             print('Parsing %s' % (args.filename))
             graphParser = Parser(raw_graph_file, csv=args.csv, gml=args.gml)
             graph = graphParser.parseGraph()
+            for node in graph:
+                print(node)
+            print("GRAPH: %s" % graph)
     except OSError as e:
         if e.errno == errno.ENOENT:
             print('Could not find graph file "%s"' % (args.filename))

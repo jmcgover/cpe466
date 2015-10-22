@@ -37,18 +37,76 @@ class Graph(object):
     def getNodeList(self):
         return self.nodeList
 
+class Node(object):
+    def __init__(self, label):
+        self.label = label
+        self.edges = {}
+        self.neighborList = []
+
+    def __cmp__(self, other):
+        return self.label.__cmp__(other.label)
+
+    def __lt__(self, other):
+        return self.label.__lt__(other.label)
+
+    def __str__(self):
+        str = "{%s: " % self.label
+        first = True
+        for e in self.neighborList:
+            if not first:
+                str += ','
+            else:
+                first = False
+            str  += '{%s: %s}' % (e, self.edges[e])
+        str += '}'
+        return str
+
+    def hash(self):
+        return self.label.hash()
+
+    def addEdge(self, neighbor, edgeLabel):
+        if neighbor not in  self.edges:
+            bisect.insort(self.neighborList, neighbor)
+            self.edges[neighbor] = edgeLabel
+
+    def getLabel(self):
+        return self.label
+    def getEdge(self, neighbor):
+        return self.neighbors[neighbor]
+    def getEdges(self):
+        return self.edges
+    def getNeighbors(self):
+        return self.neighbors
+
+class Edge(object):
+    def __init__(self, node, label, neighbor):
+        self.node = node
+        self.label = label
+        self.neighbor = neighbor
+
+    def getNode(self):
+        return self.node
+    def getLabel(self):
+        return self.label
+    def getNeighbor(self):
+        return self.neighbor
+
 class Parser(object):
     commentChars = {'#' : True}
-    def __init__(self, file, csv=True, gml=False, graph=None):
-        if not csv and not gml:
-            raise AttributeError('Must be either csv or gml, not neither.')
-        if csv and gml:
-            raise AttributeError('Must be either csv or gml, not both.')
-        self.file = file
-        self.linesParsed = 0
-        self.csv = csv
-        self.gml = gml
-        self.graph = None
+    def __init__(self, file, csv=False, gml=False, txt=False, graph=None):
+        if graph:
+            self.graph = graph
+        else :
+            if not csv and not gml and not txt:
+                raise AttributeError('Must be either csv or gml or txt, not none.')
+            if (csv and gml) or (csv and txt) or (gml and txt):
+                raise AttributeError('Must be either csv or gml or txt, not both.')
+            self.file = file
+            self.linesParsed = 0
+            self.csv = csv
+            self.gml = gml
+            self.txt = txt
+            self.graph = None
     def parseGraph(self):
         try:
             self.file.readable()
@@ -105,57 +163,3 @@ class Parser(object):
                 for i in range(0, len(tuple)):
                     tuple[i] = tuple[i].strip().strip('"')
         return tuple
-
-class Node(object):
-    def __init__(self, label):
-        self.label = label
-        self.edges = {}
-        self.neighborList = []
-
-    def __cmp__(self, other):
-        return self.label.__cmp__(other.label)
-
-    def __lt__(self, other):
-        return self.label.__lt__(other.label)
-
-    def __str__(self):
-        str = "{%s: " % self.label
-        first = True
-        for e in self.neighborList:
-            if not first:
-                str += ','
-            else:
-                first = False
-            str  += '{%s: %s}' % (e, self.edges[e])
-        str += '}'
-        return str
-
-    def hash(self):
-        return self.label.hash()
-
-    def addEdge(self, neighbor, edgeLabel):
-        if neighbor not in  self.edges:
-            bisect.insort(self.neighborList, neighbor)
-            self.edges[neighbor] = edgeLabel
-
-    def getLabel(self):
-        return self.label
-    def getEdge(self, neighbor):
-        return self.neighbors[neighbor]
-    def getEdges(self):
-        return self.edges
-    def getNeighbors(self):
-        return self.neighbors
-
-class Edge(object):
-    def __init__(self, node, label, neighbor):
-        self.node = node
-        self.label = label
-        self.neighbor = neighbor
-
-    def getNode(self):
-        return self.node
-    def getLabel(self):
-        return self.label
-    def getNeighbor(self):
-        return self.neighbor

@@ -63,10 +63,11 @@ def main():
     args = argParser.parse_args()
     quiet = args.quiet
     # FIGURE OUT FILETYPE
-    if not args.csv and not args.gml:
+    if not args.csv and not args.gml and not args.txt:
         args.csv  = args.filename[-4:] == '.csv'
         args.gml  = args.filename[-4:] == '.gml'
-        if not args.csv and not args.gml:
+        args.txt  = args.filename[-4:] == '.txt'
+        if not args.csv and not args.gml and not args.txt:
             print('Please provide a file ending in .csv or .gml \
                     or provide the appropriate command line flags')
             argParser.print_help()
@@ -79,7 +80,7 @@ def main():
         with open(args.filename) as raw_graph_file:
             if not quiet:
                 print('Parsing %s...' % (args.filename))
-            graphParser = Parser(raw_graph_file, csv=args.csv, gml=args.gml)
+            graphParser = Parser(raw_graph_file, csv=args.csv, gml=args.gml, txt=args.txt)
             graph = graphParser.parseGraph()
             if not quiet:
                 print('Done parsing %s.' % (args.filename))
@@ -89,7 +90,7 @@ def main():
             return errno.ENOENT
     if graph == None:
         print('Soemthing fucky happened and graph is empty', file=sys.stderr)
-        return errno.EPERM
+        return errno.EINVAL
     # DO STUFF WITH IT
 
     # PRINT

@@ -1,5 +1,10 @@
+# CPE 466 Fall 2015
+# Lab 3: PageRank
+# Jeff McGovern - jmcgover@calpoly.edu
+# Nicole Martin - nlmartin@calpoly.edu
+
 import bisect
-from networkx import read_gml
+# from networkx import read_gml
 
 class Graph(object):
     def __init__(self):
@@ -7,7 +12,7 @@ class Graph(object):
         self.edges = []
 
     def addEdge(self, node, edgeLabel, neighbor):
-        if a not in self.nodes:
+        if node not in self.nodes:
             self.nodes[node] = {}
         self.nodes[node].addEdge(neighbor, edgeLabel)
         self.edges.append(Edge(node, edgeLabel, neighbor))
@@ -36,15 +41,15 @@ class Parser(object):
         if self.csv:
             # CSV Parsing goes here
             for line in self.file:
-                tuple = self._getTuple(line)
+                tuple = self._getTupleCSV(line)
                 if tuple and len(tuple) == 4:
                     a = tuple[0]
                     b = tuple[2]
                     a_b = int(tuple[1])
                     b_a = int(tuple[3])
                     if a_b == 0 and b_a == 0:
-                        self.graph.addEdge(a, a_b, b)
-                        self.graph.addEdge(b, b_a, a)
+                        self.graph.addEdge(a, True, b)
+                        self.graph.addEdge(b, True, a)
                     else:
                         if a_b > 0:
                             self.graph.addEdge(a, a_b, b)
@@ -52,7 +57,8 @@ class Parser(object):
                             self.graph.addEdge(b, b_a, a)
         if self.gml:
             # GML Parsing goes here
-            self.graph = read_gml
+            # self.graph = read_gml
+            print('Parsing GML..')
         return self.graph
     def _getTupleCSV(self, line):
         tuple = None

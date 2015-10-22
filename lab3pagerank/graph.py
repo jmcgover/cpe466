@@ -15,7 +15,12 @@ class Graph(object):
         return self.nodeList.__iter__()
     def __str__(self):
         str = "{"
+        first = True
         for n in self:
+            if not first:
+                str += ','
+            else:
+                first = False
             str += "%s" % n
         str += "}"
         return str
@@ -25,7 +30,6 @@ class Graph(object):
             newNode = Node(node)
             self.nodes[node] = newNode
             bisect.insort(self.nodeList, newNode)
-            print("UGH: %s" % newNode)
         self.nodes[node].addEdge(neighbor, edgeLabel)
         self.edges.append(Edge(node, edgeLabel, neighbor))
     def containsNode(self, node):
@@ -80,7 +84,6 @@ class Parser(object):
             self.linesParsed += 1
             if line[0] not in self.commentChars:
                 line = line.strip()
-                print(line)
                 tuple = line.split(',')
                 for i in range(0, len(tuple)):
                     tuple[i] = tuple[i].strip().strip('"')
@@ -102,11 +105,12 @@ class Node(object):
         str = "{%s: " % self.label
         first = True
         for e in self.neighborList:
-            if first:
-                str  += '{%s: %s}' % (e, self.edges[e])
+            if not first:
+                str += ','
             else:
-                str  += ',{%s: %s}' % (e, self.edges[e])
-        str += "}"
+                first = False
+            str  += '{%s: %s}' % (e, self.edges[e])
+        str += '}'
         return str
 
     def hash(self):

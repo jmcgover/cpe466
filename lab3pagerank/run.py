@@ -7,6 +7,7 @@
 
 import errno
 import json
+import operator
 import os
 import pickle
 import sys
@@ -28,8 +29,8 @@ INDENT=4
 DESCRIPTION  = 'CPE 466 Lab 3: PageRank.'
 DESCRIPTION += ''
 
-DEF_LEAVE = .15
-DEF_EPSILON = .050
+DEF_LEAVE = .05
+DEF_EPSILON = .0000005
 
 def buildPageRankArgs():
     argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION)
@@ -77,6 +78,10 @@ def buildPageRankArgs():
             action='store_true',
             default=False,
             help='only parses the graph, doesn\'t PageRank')
+    argParser.add_argument('-R', '--print-results-stats',
+            action='store_true',
+            default=False,
+            help='print statistics of the results')
     # Initial size of graph
     argParser.add_argument('-i', '--initial-size',
             action='store',
@@ -181,11 +186,18 @@ def main():
     if not args.parse_only:
         calculator = PageRankCalculator(graph)
         if not quiet:
-            print('Calculating PageRank with d:%d and eps:%d' % (d, epsilon))
+            print('CALCULATING PageRank with d:%d and eps:%d' % (d, epsilon))
+            print('Damping: %f' % d)
+            print('Epsilon: %f' % epsilon)
         results = calculator.calcPageRank(d, epsilon)
-        print(results)
-        for p in results:
-            print(p, results.getPageRank(p))
+        print("%s\t%s\t%s" % ("RESULT", "NODE", "PageRank"))
+        ranks = results.getPageRanks()
+        i = 1
+        for r in ranks:
+            print('%d\t%s' % (i, r))
+            i += 1
+        if args.print_results_stats:
+            print('Iterations: %d' % results.getIterations())
 
     # PAGE RANK
 

@@ -28,6 +28,9 @@ INDENT=4
 DESCRIPTION  = 'CPE 466 Lab 3: PageRank.'
 DESCRIPTION += ''
 
+DEF_LEAVE = .15
+DEF_EPSILON = .050
+
 def buildPageRankArgs():
     argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION)
     argParser.add_argument('-f','--filename',
@@ -39,6 +42,25 @@ def buildPageRankArgs():
             action='store_true',
             default=False,
             help='quiets the pretty part of the output but errors are still printed')
+    argParser.add_argument('-e', '--epsilon',
+            action='store',
+            type=float,
+            default=DEF_EPSILON,
+            metavar='num',
+            required=False,
+            help='epsilon to stop the iteration at')
+    argParser.add_argument('-d', '--leave',
+            action='store',
+            type=float,
+            default=DEF_LEAVE,
+            metavar='prob',
+            required=False,
+            help='probiality that we will leave a node ("d" in PageRank)')
+    # PROINTING
+    argParser.add_argument('-E','--print-edges',
+            action='store',
+            metavar='label1,label2,...',
+            help='prints the edges for the node labels given')
     argParser.add_argument('-N', '--print-nodes',
             action='store_true',
             default=False,
@@ -51,6 +73,10 @@ def buildPageRankArgs():
             action='store_true',
             default=False,
             help='prints numebrs relevant to the graph')
+    argParser.add_argument('-P', '--parse-only',
+            action='store_true',
+            default=False,
+            help='only parses the graph, doesn\'t PageRank')
     # Initial size of graph
     argParser.add_argument('-i', '--initial-size',
             action='store',
@@ -79,6 +105,12 @@ def main():
     argParser = buildPageRankArgs()
     args = argParser.parse_args()
     quiet = args.quiet
+    d = DEF_LEAVE
+    epsilon = DEF_EPSILON
+    if args.leave:
+        d = float(args.leave)
+    if args.epsilon:
+        epsilon = float(args.epsilon)
     # FIGURE OUT FILETYPE
     if not args.csv and not args.gml and not args.txt:
         args.csv  = args.filename[-4:] == '.csv'
@@ -115,6 +147,14 @@ def main():
 
     # PRINT
     # NODE
+    if args.print_edges:
+        if not quiet:
+            print('-' * WIDTH)
+            print('Printing EDGES')
+            print('-' * WIDTH)
+        for n in args.print_edges.split(','):
+            print(graph.getNodeEdges(n))
+
     if args.print_nodes:
         if not quiet:
             print('-' * WIDTH)
@@ -138,6 +178,14 @@ def main():
         print("Edges: %d" % (graph.getNumEdges()))
     if not quiet:
         print('-' * WIDTH)
+    if not args.parse_only:
+        calculator = PageRankCalculator(graph)
+        if not quiet:
+            print('Calculating PageRank with d:%d and eps:%d' % (d, epsilon))
+        results = calculator.calcPageRank(d, epsilon)
+        print(results)
+        for p in results:
+            print(p, results.getPageRank(p))
 
     # PAGE RANK
 

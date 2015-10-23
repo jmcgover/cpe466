@@ -36,6 +36,10 @@ class EfficientGraph():
         return self.numEdges
     def getNodesUsed(self):
         return self.nodesUsed
+    def getNodeEdges(self, node):
+        return self.nodes[int(node)]
+    def getNodeNeighbors(self, node):
+        return self.nodes[node]
 
 class Graph(object):
     def __init__(self, sortNeighbors=True):
@@ -85,6 +89,12 @@ class Graph(object):
         return len(self.nodes)
     def getNumEdges(self):
         return self.numEdges
+    def getNodeEdges(self, node):
+        return self.nodes[node]
+    def getNodesUsed(self):
+        return self.nodesUsed
+    def getNodeNeighbors(self, node):
+        return self.nodes[node].getNeighbors()
 
 class Node(object):
     def __init__(self, label, sortNeighbors=False):
@@ -127,7 +137,7 @@ class Node(object):
     def getEdges(self):
         return self.edges
     def getNeighbors(self):
-        return self.neighbors
+        return self.edges
 
 class Edge(object):
     def __init__(self, node, label, neighbor):

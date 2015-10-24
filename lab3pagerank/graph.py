@@ -240,8 +240,6 @@ class Parser(object):
                         locale.format( "%d", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, grouping=True)))
         if self.csv:
             # CSV Parsing goes here
-            if not self.quiet:
-                print('Parsing CSV..')
             self.graph = Graph()
             for line in self.file:
                 tuple = self._getTupleCSV(line)

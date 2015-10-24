@@ -69,7 +69,7 @@ class PageRankResults(object):
                 print('= %f : %s' % (newPageRank, node))
         self.pageRanks = newPageRanks
         self.iterations += 1
-        gc.collect()
+        #gc.collect()
 
     def getMaxDelta(self):
         return self.maxDelta

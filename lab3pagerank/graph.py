@@ -223,7 +223,9 @@ class Parser(object):
                     elif len(tuple) == 3:
                         a = int(tuple[0])
                         b = int(tuple[1])
-                        self.graph.addEdge(a, 1, b)
+                        a_b = int(tuple[2])
+                        if a_b > 0:
+                            self.graph.addEdge(a, 1, b)
                     else:
                         print('FOUND TUPLE LEN %d' % (len(tuple)), file=sys.stderr)
                 if not self.quiet and self.linesParsed % 1000000 == 0:

@@ -31,7 +31,7 @@ DESCRIPTION  = 'CPE 466 Lab 3: PageRank.'
 DESCRIPTION += ''
 
 DEF_DAMPER = .5
-DEF_EPSILON = .1
+DEF_EPSILON = .0000001
 DEF_LIMIT = 25
 
 FMT_STR = '%s,%s,%s,%s,%s,%s,%s,%s'

@@ -204,8 +204,8 @@ def main():
             print('-' * WIDTH, file=sys.stderr)
             print('Printing NODES', file=sys.stderr)
             print('-' * WIDTH, file=sys.stderr)
-        for n in graph:
-            print(n, len(graph.getNodeNeighbors(n)), file=sys.stderr,)
+        for n in graph.getNodes():
+            print(len(graph.getNodeNeighbors(n)), graph.getNode(n), file=sys.stderr,)
     # GRAPH
     if args.print_graph:
         if not quiet:
@@ -227,21 +227,23 @@ def main():
         if not quiet:
             print('CALCULATING PageRank', file=sys.stderr)
             print('-' * WIDTH, file=sys.stderr)
-            print('Damping: %f' % d, file=sys.stderr)
-            print('Epsilon: %f' % epsilon, file=sys.stderr)
         t0 = time.time()
         results = calculator.calcPageRank(d, epsilon)
         t1 = time.time()
         calcTime = t1 - t0
         ranks = results.getPageRanks()
         if not args.time:
-            print("%s\t%s\t%s" % ("RESULT", "NODE", "PageRank"), file=sys.stderr)
+            print('-' * WIDTH, file=sys.stderr)
+            print('Damping: %f' % d, file=sys.stderr)
+            print('Epsilon: %f' % epsilon, file=sys.stderr)
+            print("%s\t%s\t\t\t%s" % ("RESULT", "NODE", "PageRank"), file=sys.stderr)
             i = 1
             for r in ranks:
-                print('%d\t%s\t%.12f' % (i, r.getNodeLabel(), r.getPageRank()), file=sys.stderr)
+                print('%d\t%s\t\t\t%.12f' % (i, r.getNodeLabel(), r.getPageRank()), file=sys.stderr)
                 i += 1
                 if args.limit > 0 and i == args.limit:
                     break
+            print('-' * WIDTH, file=sys.stderr)
         print(TIMING_HEADER)
         print(FMT_STR % (args.filename,d,epsilon,graph.getNumNodes(),graph.getNumEdges(),parseTime,calcTime,results.getIterations()))
     else:

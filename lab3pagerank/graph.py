@@ -54,10 +54,7 @@ class Graph(object):
         if sortNeighbors:
             self.nodeList = []
     def __iter__(self):
-        if hasattr(self, 'nodeList'): # If memory isn't an issue
-            return self.nodeList.__iter__()
-        else:
-            return self.nodes.__iter__()
+        return sorted(self.nodes.keys()).__iter__()
     def __str__(self):
         str = "{"
         first = True
@@ -79,6 +76,14 @@ class Graph(object):
             else:
                 newNode = Node(node)
             self.nodes[node] = newNode
+        if neighbor not in self.nodes:
+            newNode = None
+            if hasattr(self, 'nodeList'): # If memory isn't an issue
+                newNode = Node(neighbor, sortNeighbors=True)
+                bisect.insort(self.nodeList, newNode)
+            else:
+                newNode = Node(neighbor)
+            self.nodes[neighbor] = newNode
         self.nodes[node].addEdge(neighbor, edgeLabel)
         self.numEdges += 1
         self.nodesUsed[node] = True
@@ -90,6 +95,10 @@ class Graph(object):
             return self.nodeList
         else:
             return self.nodes.keys()
+    def getNode(self, node):
+        return self.nodes[node]
+    def getNodes(self):
+        return self.nodes
     def getNumNodes(self):
         return len(self.nodes)
     def getNumEdges(self):
@@ -99,7 +108,11 @@ class Graph(object):
     def getNodesUsed(self):
         return self.nodesUsed
     def getNodeNeighbors(self, node):
-        return self.nodes[node].getNeighbors()
+        try:
+            return self.nodes[node].getNeighbors()
+        except KeyError as err:
+            print("%s" % node)
+            raise err
 
 class Node(object):
     def __init__(self, label, sortNeighbors=False):

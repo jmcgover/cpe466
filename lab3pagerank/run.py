@@ -32,7 +32,7 @@ DESCRIPTION += ''
 
 DEF_DAMPER = .5
 DEF_EPSILON = .0000001
-DEF_LIMIT = 25
+DEF_LIMIT = 75
 
 FMT_STR = '%s,%s,%s,%s,%s,%s,%s,%s'
 TIMING_HEADER = FMT_STR % ('Filename','d','e','Nodes','Edges','ParseTime(sec)','PageRankTime(s)','Iterations')

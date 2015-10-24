@@ -233,11 +233,11 @@ class Parser(object):
                         locale.format( "%d", self.linesParsed, grouping=True),
                         locale.format( "%d", self.graph.getNumNodes(), grouping=True),
                         locale.format( "%d", self.graph.getNumEdges(), grouping=True),
-                        locale.format( "%dB", sys.getsizeof(self.graph), grouping=True),
-                        locale.format( "%dB", sys.getsizeof(self.graph.nodes), grouping=True),
-                        locale.format( "%dB", a, grouping=True),
-                        locale.format( "%dB", sys.getsizeof(self.graph.nodes[a]), grouping=True),
-                        locale.format( "%dKB", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, grouping=True)))
+                        locale.format( "%d", sys.getsizeof(self.graph), grouping=True),
+                        locale.format( "%d", sys.getsizeof(self.graph.nodes), grouping=True),
+                        locale.format( "%d", a, grouping=True),
+                        locale.format( "%d", sys.getsizeof(self.graph.nodes[a]), grouping=True),
+                        locale.format( "%d", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, grouping=True)))
         if self.csv:
             # CSV Parsing goes here
             if not self.quiet:

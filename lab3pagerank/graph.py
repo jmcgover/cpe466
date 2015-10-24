@@ -15,6 +15,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.utf8')
 class EfficientGraph():
     def __init__(self, maxNodeNum):
         self.nodes = [{}] * (maxNodeNum + 1)
+        #self.nodes = dict.fromkeys(range(maxNodeNum + 1))
         self.numEdges = 0
         self.nodesUsed = {}
     def __iter__(self):
@@ -39,17 +40,21 @@ class EfficientGraph():
     def getNodeEdges(self, node):
         return self.nodes[int(node)]
     def getNodeNeighbors(self, node):
-        return self.nodes[node]
+        try:
+            return self.nodes[node]
+        except IndexError as err:
+            return None
 
 class Graph(object):
     def __init__(self, sortNeighbors=True, maxNodeNum=None):
         self.nodes = {}
+        self.numNodes = 0
         self.numEdges = 0
         self.nodesUsed = {}
         if sortNeighbors:
             self.nodeList = []
     def __iter__(self):
-        if self.nodeList:
+        if hasattr(self, 'nodeList'): # If memory isn't an issue
             return self.nodeList.__iter__()
         else:
             return self.nodes.__iter__()
@@ -109,6 +114,9 @@ class Node(object):
     def __lt__(self, other):
         return self.label.__lt__(other.label)
 
+    def __eq__(self, other):
+        return self.label.__eq__(other) or self.label.__eq__(other.label)
+
     def __str__(self):
         str = "{%s: " % self.label
         first = True
@@ -121,8 +129,8 @@ class Node(object):
         str += '}'
         return str
 
-    def hash(self):
-        return self.label.hash()
+    def __hash__(self):
+        return self.label.__hash__()
 
     def addEdge(self, neighbor, edgeLabel):
         if neighbor not in self.edges:
@@ -188,26 +196,33 @@ class Parser(object):
                         self.initialSize = max(maxNodeNum, int(tuple[0]), int(tuple[1]))
             if not self.quiet:
                 print('Max node is %d.' % self.initialSize)
-            #self.graph = EfficientGraph(self.initialSize)
-            self.graph = Graph(sortNeighbors=False, maxNodeNum=self.initialSize)
+            self.graph = EfficientGraph(self.initialSize)
+            #self.graph = Graph(sortNeighbors=False, maxNodeNum=self.initialSize)
             self.file.seek(0)
             self.linesParsed = 0;
             for line in self.file:
                 tuple = self._getTupleTXT(line)
-                if tuple and len(tuple) >= 2:
-                    a = int(tuple[0])
-                    b = int(tuple[1])
-                    self.graph.addEdge(a, True, b)
-                    if not self.quiet and self.linesParsed % 1000000 == 0:
-                        print("%s: (nodes:%s, edges:%s) graph:%s nodes:%s [%s]:%s total:%s" % (
-                            locale.format( "%d", self.linesParsed, grouping=True),
-                            locale.format( "%d", self.graph.getNumNodes(), grouping=True),
-                            locale.format( "%d", self.graph.getNumEdges(), grouping=True),
-                            locale.format( "%dB", sys.getsizeof(self.graph), grouping=True),
-                            locale.format( "%dB", sys.getsizeof(self.graph.nodes), grouping=True),
-                            locale.format( "%dB", a, grouping=True),
-                            locale.format( "%dB", sys.getsizeof(self.graph.nodes[a]), grouping=True),
-                            locale.format( "%dKB", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, grouping=True)))
+                if tuple:
+                    if len(tuple) == 2:
+                        a = int(tuple[0])
+                        b = int(tuple[1])
+                        self.graph.addEdge(a, 1, b)
+                    elif len(tuple) == 3:
+                        a = int(tuple[0])
+                        b = int(tuple[1])
+                        self.graph.addEdge(a, 1, b)
+                    else:
+                        print('FOUND TUPLE LEN %d' % (len(tuple)), file=sys.stderr)
+                if not self.quiet and self.linesParsed % 1000000 == 0:
+                    print("%s: (nodes:%s, edges:%s) graph:%s nodes:%s [%s]:%s total:%s" % (
+                        locale.format( "%d", self.linesParsed, grouping=True),
+                        locale.format( "%d", self.graph.getNumNodes(), grouping=True),
+                        locale.format( "%d", self.graph.getNumEdges(), grouping=True),
+                        locale.format( "%dB", sys.getsizeof(self.graph), grouping=True),
+                        locale.format( "%dB", sys.getsizeof(self.graph.nodes), grouping=True),
+                        locale.format( "%dB", a, grouping=True),
+                        locale.format( "%dB", sys.getsizeof(self.graph.nodes[a]), grouping=True),
+                        locale.format( "%dKB", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, grouping=True)))
         if self.csv:
             # CSV Parsing goes here
             if not self.quiet:
@@ -224,12 +239,14 @@ class Parser(object):
                         self.graph.addEdge(a, True, b)
                         if self.undirected:
                             print('ADDING UNDIRECTED')
-                            self.graph.addEdge(b, True, a)
+                            self.graph.addEdge(b, 1, a)
                     else:
-                        if a_b > 0:
-                            self.graph.addEdge(a, a_b, b)
-                        if b_a > 0:
-                            self.graph.addEdge(b, b_a, a)
+                        if a_b > b_a:
+                            self.graph.addEdge(a, 1, b)
+                        else:
+                            self.graph.addEdge(b, 1, a)
+                        
+
         if self.gml:
             # GML Parsing goes here
             # self.graph = read_gml

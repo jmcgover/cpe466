@@ -54,11 +54,14 @@ class PageRankResults(object):
                 print("(1-%f) / %d" % (damper, self.numNodes))
             newPageRank = (1-damper)/self.numNodes
             neighbors = self.graph.getNodeNeighbors(node)
-            for neighbor in neighbors:
-                newPageRank += damper * \
-                        self.pageRanks[neighbor].getPageRank()/len(self.graph.getNodeNeighbors(neighbor))
-                if self.verbose:
-                    print(' + %f * %f / %d : %s'% (damper, self.pageRanks[neighbor].getPageRank(), len(self.graph.getNodeNeighbors(neighbor)), neighbor))
+            if neighbors:
+                for neighbor in neighbors:
+                    neighborsOutbound = self.graph.getNodeNeighbors(neighbor)
+                    if neighborsOutbound:
+                        newPageRank += damper * \
+                                self.pageRanks[neighbor].getPageRank()/len(neighborsOutbound)
+                        if self.verbose:
+                            print(' + %f * %f / %d : %s'% (damper, self.pageRanks[neighbor].getPageRank(), len(self.graph.getNodeNeighbors(neighbor)), neighbor))
             newPageRanks[node] = PageRank(node, newPageRank);
             oldPageRank = self.pageRanks[node].getPageRank()
             self.maxDelta = max(self.maxDelta, abs(newPageRank - oldPageRank))

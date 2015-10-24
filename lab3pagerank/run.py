@@ -30,8 +30,9 @@ INDENT=4
 DESCRIPTION  = 'CPE 466 Lab 3: PageRank.'
 DESCRIPTION += ''
 
-DEF_DAMPER = .05
-DEF_EPSILON = .0000005
+DEF_DAMPER = .5
+DEF_EPSILON = .1
+DEF_LIMIT = 25
 
 FMT_STR = '%s,%s,%s,%s,%s,%s,%s,%s'
 TIMING_HEADER = FMT_STR % ('Filename','d','e','Nodes','Edges','ParseTime(sec)','PageRankTime(s)','Iterations')
@@ -73,6 +74,13 @@ def buildPageRankArgs():
             metavar='prob',
             required=False,
             help='damper constant (default is %f)' % DEF_DAMPER)
+    argParser.add_argument('-l', '--limit',
+            action='store',
+            type=float,
+            default=DEF_LIMIT,
+            metavar='prob',
+            required=False,
+            help='limit of top results to show (defualt is %d)' % DEF_LIMIT)
     argParser.add_argument('-u', '--undirected',
             action='store_true',
             default=False,
@@ -197,7 +205,7 @@ def main():
             print('Printing NODES', file=sys.stderr)
             print('-' * WIDTH, file=sys.stderr)
         for n in graph:
-            print(n, len(n.getNeighbors()), file=sys.stderr)
+            print(n, len(graph.getNodeNeighbors(n)), file=sys.stderr,)
     # GRAPH
     if args.print_graph:
         if not quiet:
@@ -217,22 +225,28 @@ def main():
     if not args.parse_only:
         calculator = PageRankCalculator(graph, verbose=args.verbose)
         if not quiet:
-            print('CALCULATING PageRank with d:%d and eps:%d' % (d, epsilon), file=sys.stderr)
+            print('CALCULATING PageRank', file=sys.stderr)
+            print('-' * WIDTH, file=sys.stderr)
             print('Damping: %f' % d, file=sys.stderr)
             print('Epsilon: %f' % epsilon, file=sys.stderr)
-        results = calculator.calcPageRank(d, epsilon)
         t0 = time.time()
-        ranks = results.getPageRanks()
+        results = calculator.calcPageRank(d, epsilon)
         t1 = time.time()
         calcTime = t1 - t0
+        ranks = results.getPageRanks()
         if not args.time:
             print("%s\t%s\t%s" % ("RESULT", "NODE", "PageRank"), file=sys.stderr)
             i = 1
             for r in ranks:
-                print('%d\t%s' % (i, r), file=sys.stderr)
+                print('%d\t%s\t%.12f' % (i, r.getNodeLabel(), r.getPageRank()), file=sys.stderr)
                 i += 1
+                if args.limit > 0 and i == args.limit:
+                    break
         print(TIMING_HEADER)
         print(FMT_STR % (args.filename,d,epsilon,graph.getNumNodes(),graph.getNumEdges(),parseTime,calcTime,results.getIterations()))
+    else:
+        print(TIMING_HEADER)
+        print(FMT_STR % (args.filename,d,epsilon,graph.getNumNodes(),graph.getNumEdges(),parseTime,calcTime,None))
 
     # PAGE RANK
 

@@ -42,7 +42,7 @@ class EfficientGraph():
         return self.nodes[node]
 
 class Graph(object):
-    def __init__(self, sortNeighbors=True):
+    def __init__(self, sortNeighbors=True, maxNodeNum=None):
         self.nodes = {}
         self.numEdges = 0
         self.nodesUsed = {}
@@ -154,7 +154,7 @@ class Edge(object):
 
 class Parser(object):
     commentChars = {'#' : True}
-    def __init__(self, file, csv=False, gml=False, txt=False, graph=None, quiet=False, initialSize=None):
+    def __init__(self, file, csv=False, gml=False, txt=False, graph=None, quiet=False, initialSize=None, undirected=False):
         if graph:
             self.graph = graph
         else :
@@ -170,6 +170,7 @@ class Parser(object):
             self.graph = None
             self.quiet = quiet
             self.initialSize = initialSize
+            self.undirected = undirected
     def parseGraph(self):
         try:
             self.file.readable()
@@ -187,7 +188,8 @@ class Parser(object):
                         self.initialSize = max(maxNodeNum, int(tuple[0]), int(tuple[1]))
             if not self.quiet:
                 print('Max node is %d.' % self.initialSize)
-            self.graph = EfficientGraph(self.initialSize)
+            #self.graph = EfficientGraph(self.initialSize)
+            self.graph = Graph(sortNeighbors=False, maxNodeNum=self.initialSize)
             self.file.seek(0)
             self.linesParsed = 0;
             for line in self.file:
@@ -201,11 +203,11 @@ class Parser(object):
                             locale.format( "%d", self.linesParsed, grouping=True),
                             locale.format( "%d", self.graph.getNumNodes(), grouping=True),
                             locale.format( "%d", self.graph.getNumEdges(), grouping=True),
-                            locale.format( "%d", sys.getsizeof(self.graph), grouping=True),
-                            locale.format( "%d", sys.getsizeof(self.graph.nodes), grouping=True),
-                            locale.format( "%d", a, grouping=True),
-                            locale.format( "%d", sys.getsizeof(self.graph.nodes[a]), grouping=True),
-                            locale.format( "%d", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, grouping=True)))
+                            locale.format( "%dB", sys.getsizeof(self.graph), grouping=True),
+                            locale.format( "%dB", sys.getsizeof(self.graph.nodes), grouping=True),
+                            locale.format( "%dB", a, grouping=True),
+                            locale.format( "%dB", sys.getsizeof(self.graph.nodes[a]), grouping=True),
+                            locale.format( "%dKB", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, grouping=True)))
         if self.csv:
             # CSV Parsing goes here
             if not self.quiet:
@@ -220,7 +222,9 @@ class Parser(object):
                     b_a = int(tuple[3])
                     if a_b == 0 and b_a == 0:
                         self.graph.addEdge(a, True, b)
-                        self.graph.addEdge(b, True, a)
+                        if self.undirected:
+                            print('ADDING UNDIRECTED')
+                            self.graph.addEdge(b, True, a)
                     else:
                         if a_b > 0:
                             self.graph.addEdge(a, a_b, b)

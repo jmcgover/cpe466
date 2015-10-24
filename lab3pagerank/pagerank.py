@@ -34,7 +34,7 @@ class PageRank(object):
         return self.pageRank
 
 class PageRankResults(object):
-    def __init__(self, graph):
+    def __init__(self, graph, verbose=False):
         self.graph = graph
         self.numNodes = graph.getNumNodes()
         self.pageRanks = dict.fromkeys(graph.getNodesUsed())
@@ -42,19 +42,28 @@ class PageRankResults(object):
         self.iterations = 0
         for node in self.pageRanks:
             self.pageRanks[node] = PageRank(node, 1.0/self.numNodes)
+        self.verbose = verbose
 
-    def updatePageRanks(self, d):
+    def updatePageRanks(self, damper):
         newPageRanks = dict.fromkeys(self.pageRanks)
         pageRank = None
         self.maxDelta = 0
         for node in self.graph.getNodesUsed():
-            newPageRank = (1-d)/self.numNodes
+            if self.verbose:
+                print('%s: %s' % (self.iterations, node))
+                print("(1-%f) / %d" % (damper, self.numNodes))
+            newPageRank = (1-damper)/self.numNodes
             neighbors = self.graph.getNodeNeighbors(node)
             for neighbor in neighbors:
-                newPageRank += d * self.pageRanks[neighbor].getPageRank()
+                newPageRank += damper * \
+                        self.pageRanks[neighbor].getPageRank()/len(self.graph.getNodeNeighbors(neighbor))
+                if self.verbose:
+                    print(' + %f * %f / %d : %s'% (damper, self.pageRanks[neighbor].getPageRank(), len(self.graph.getNodeNeighbors(neighbor)), neighbor))
             newPageRanks[node] = PageRank(node, newPageRank);
             oldPageRank = self.pageRanks[node].getPageRank()
             self.maxDelta = max(self.maxDelta, abs(newPageRank - oldPageRank))
+            if self.verbose:
+                print('= %f : %s' % (newPageRank, node))
         self.pageRanks = newPageRanks
         self.iterations += 1
         gc.collect()
@@ -72,13 +81,14 @@ class PageRankResults(object):
         return sortedRanks
 
 class PageRankCalculator(object):
-    def __init__(self, graph):
+    def __init__(self, graph, verbose=False):
         self.graph = graph
         self.numNodes = graph.getNumNodes()
-    def calcPageRank(self, d, epsilon):
-        results = PageRankResults(self.graph)
+        self.verbose = verbose
+    def calcPageRank(self, damper, epsilon):
+        results = PageRankResults(self.graph, verbose=self.verbose)
         while results.getMaxDelta() == None or results.getMaxDelta() > epsilon:
-            results.updatePageRanks(d)
+            results.updatePageRanks(damper)
         return results
 
 

@@ -12,6 +12,7 @@ import os
 import pickle
 import sys
 import textwrap
+import time
 import argparse
 
 sys.path.append(os.getcwd())
@@ -29,8 +30,11 @@ INDENT=4
 DESCRIPTION  = 'CPE 466 Lab 3: PageRank.'
 DESCRIPTION += ''
 
-DEF_LEAVE = .05
+DEF_DAMPER = .05
 DEF_EPSILON = .0000005
+
+FMT_STR = '%s,%s,%s,%s,%s,%s,%s,%s'
+TIMING_HEADER = FMT_STR % ('Filename','d','e','Nodes','Edges','ParseTime(sec)','PageRankTime(s)','Iterations')
 
 def buildPageRankArgs():
     argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION)
@@ -43,21 +47,37 @@ def buildPageRankArgs():
             action='store_true',
             default=False,
             help='quiets the pretty part of the output but errors are still printed')
+    argParser.add_argument('-v', '--verbose',
+            action='store_true',
+            default=False,
+            help='verobsely prints the details of each iteration')
+    argParser.add_argument('-t', '--time',
+            action='store_true',
+            default=False,
+            help='outputs time only to stdout in csv format')
+    argParser.add_argument('-H', '--header',
+            action='store_false',
+            default=True,
+            help='suppresses the timing header')
     argParser.add_argument('-e', '--epsilon',
             action='store',
             type=float,
             default=DEF_EPSILON,
             metavar='num',
             required=False,
-            help='epsilon to stop the iteration at')
-    argParser.add_argument('-d', '--leave',
+            help='epsilon to stop the iteration at (default is %f)' % DEF_EPSILON)
+    argParser.add_argument('-d', '--damper',
             action='store',
             type=float,
-            default=DEF_LEAVE,
+            default=DEF_DAMPER,
             metavar='prob',
             required=False,
-            help='probiality that we will leave a node ("d" in PageRank)')
-    # PROINTING
+            help='damper constant (default is %f)' % DEF_DAMPER)
+    argParser.add_argument('-u', '--undirected',
+            action='store_true',
+            default=False,
+            help='interpret weights with two 0\'s as undirected (default is directed)')
+    # PRINTING
     argParser.add_argument('-E','--print-edges',
             action='store',
             metavar='label1,label2,...',
@@ -100,7 +120,7 @@ def buildPageRankArgs():
             action='store_true',
             default=False,
             help='forces Graph Markup Language file interpretation')
-    group.add_argument('-t', '--txt',
+    group.add_argument('-x', '--txt',
             action='store_true',
             default=False,
             help='forces White-Space Separated file interpretation')
@@ -109,11 +129,15 @@ def buildPageRankArgs():
 def main():
     argParser = buildPageRankArgs()
     args = argParser.parse_args()
-    quiet = args.quiet
-    d = DEF_LEAVE
+    quiet = args.quiet or args.time
+    verbose = args.verbose
+    d = DEF_DAMPER
     epsilon = DEF_EPSILON
-    if args.leave:
-        d = float(args.leave)
+    if args.damper:
+        d = float(args.damper)
+        if d < 0 or d > 1:
+            print('%f is not in [0,1]',file=sys.stderr)
+            return errno.EINVAL
     if args.epsilon:
         epsilon = float(args.epsilon)
     # FIGURE OUT FILETYPE
@@ -123,27 +147,34 @@ def main():
         args.txt  = args.filename[-4:] == '.txt'
         if not args.csv and not args.gml and not args.txt:
             print('Please provide a file ending in .csv or .gml \
-                    or provide the appropriate command line flags')
+                    or provide the appropriate command line flags', file=sys.stderr)
             argParser.print_help()
             return errno.EINVAL
 
     # PARSE GRAPH
     graph = None
+    parseTime = None
+    calcTime = None
+    t0 = None
+    t1 = None
     try:
         graphParser = None
         with open(args.filename, 'r') as raw_graph_file:
             if not quiet:
-                print('Parsing %s...' % (args.filename))
+                print('Parsing %s...' % (args.filename), file=sys.stderr)
             graphParser = Parser(raw_graph_file, csv=args.csv, gml=args.gml, txt=args.txt, quiet=args.quiet, initialSize=args.initial_size)
+            t0 = time.time()
             graph = graphParser.parseGraph()
+            t1 = time.time()
+            parseTime = t1 - t0
             if not quiet:
-                print('Done parsing %s.' % (args.filename))
+                print('Done parsing %s.' % (args.filename), file=sys.stderr)
     except OSError as e:
         if e.errno == errno.ENOENT:
-            print('Could not find graph file "%s"' % (args.filename))
+            print('Could not find graph file "%s"' % (args.filename), file=sys.stderr)
             return errno.ENOENT
         else:
-            print('Some other error occured with %s' % (args.filename))
+            print('Some other error occured with %s' % (args.filename), file=sys.stderr)
             raise e
     if graph == None:
         print('Soemthing fucky happened and graph is empty', file=sys.stderr)
@@ -154,50 +185,54 @@ def main():
     # NODE
     if args.print_edges:
         if not quiet:
-            print('-' * WIDTH)
-            print('Printing EDGES')
-            print('-' * WIDTH)
+            print('-' * WIDTH, file=sys.stderr)
+            print('Printing EDGES', file=sys.stderr)
+            print('-' * WIDTH, file=sys.stderr)
         for n in args.print_edges.split(','):
-            print(graph.getNodeEdges(n))
+            print(graph.getNodeEdges(n), file=sys.stderr)
 
     if args.print_nodes:
         if not quiet:
-            print('-' * WIDTH)
-            print('Printing NODES')
-            print('-' * WIDTH)
+            print('-' * WIDTH, file=sys.stderr)
+            print('Printing NODES', file=sys.stderr)
+            print('-' * WIDTH, file=sys.stderr)
         for n in graph:
-            print(n)
+            print(n, len(n.getNeighbors()), file=sys.stderr)
     # GRAPH
     if args.print_graph:
         if not quiet:
-            print('-' * WIDTH)
-            print('Printing GRAPH')
-            print('-' * WIDTH)
-        print(graph)
+            print('-' * WIDTH, file=sys.stderr)
+            print('Printing GRAPH', file=sys.stderr)
+            print('-' * WIDTH, file=sys.stderr)
+        print(graph, file=sys.stderr)
     if args.print_stats:
         if not quiet:
-            print('-' * WIDTH)
-            print('Printing STATS')
-            print('-' * WIDTH)
-        print("Nodes: %d" % (graph.getNumNodes()))
-        print("Edges: %d" % (graph.getNumEdges()))
+            print('-' * WIDTH, file=sys.stderr)
+            print('Printing STATS', file=sys.stderr)
+            print('-' * WIDTH, file=sys.stderr)
+        print("Nodes: %d" % (graph.getNumNodes()), file=sys.stderr)
+        print("Edges: %d" % (graph.getNumEdges()), file=sys.stderr)
     if not quiet:
-        print('-' * WIDTH)
+        print('-' * WIDTH, file=sys.stderr)
     if not args.parse_only:
-        calculator = PageRankCalculator(graph)
+        calculator = PageRankCalculator(graph, verbose=args.verbose)
         if not quiet:
-            print('CALCULATING PageRank with d:%d and eps:%d' % (d, epsilon))
-            print('Damping: %f' % d)
-            print('Epsilon: %f' % epsilon)
+            print('CALCULATING PageRank with d:%d and eps:%d' % (d, epsilon), file=sys.stderr)
+            print('Damping: %f' % d, file=sys.stderr)
+            print('Epsilon: %f' % epsilon, file=sys.stderr)
         results = calculator.calcPageRank(d, epsilon)
-        print("%s\t%s\t%s" % ("RESULT", "NODE", "PageRank"))
+        t0 = time.time()
         ranks = results.getPageRanks()
-        i = 1
-        for r in ranks:
-            print('%d\t%s' % (i, r))
-            i += 1
-        if args.print_results_stats:
-            print('Iterations: %d' % results.getIterations())
+        t1 = time.time()
+        calcTime = t1 - t0
+        if not args.time:
+            print("%s\t%s\t%s" % ("RESULT", "NODE", "PageRank"), file=sys.stderr)
+            i = 1
+            for r in ranks:
+                print('%d\t%s' % (i, r), file=sys.stderr)
+                i += 1
+        print(TIMING_HEADER)
+        print(FMT_STR % (args.filename,d,epsilon,graph.getNumNodes(),graph.getNumEdges(),parseTime,calcTime,results.getIterations()))
 
     # PAGE RANK
 

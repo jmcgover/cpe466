@@ -25,14 +25,14 @@ from pagerank import PageRank
 from pagerank import PageRankCalculator
 from pagerank import PageRankResults
 
-WIDTH=100
+WIDTH=50
 INDENT=4
 DESCRIPTION  = 'CPE 466 Lab 3: PageRank.'
 DESCRIPTION += ''
 
 DEF_DAMPER = .5
 DEF_EPSILON = .0000001
-DEF_LIMIT = 75
+DEF_LIMIT = 257
 
 FMT_STR = '%s,%s,%s,%s,%s,%s,%s,%s'
 TIMING_HEADER = FMT_STR % ('Filename','d','e','Nodes','Edges','ParseTime(sec)','PageRankTime(s)','Iterations')
@@ -234,12 +234,13 @@ def main():
         ranks = results.getPageRanks()
         if not args.time:
             print('-' * WIDTH, file=sys.stderr)
-            print('Damping: %f' % d, file=sys.stderr)
-            print('Epsilon: %f' % epsilon, file=sys.stderr)
-            print("%s\t%s\t\t\t%s" % ("RESULT", "NODE", "PageRank"), file=sys.stderr)
+            print('Filename\t: %s' % args.filename, file=sys.stderr)
+            print('Damping\t: %.9f' % d, file=sys.stderr)
+            print('Epsilon\t: %.9f' % epsilon, file=sys.stderr)
+            print("%s\t%s\t%s" % ("RESULT", "NODE", "PageRank"), file=sys.stderr)
             i = 1
             for r in ranks:
-                print('%d\t%s\t\t\t%.24f' % (i, r.getNodeLabel(), r.getPageRank()), file=sys.stderr)
+                print('%d\t%s\t%.9f' % (i, r.getNodeLabel(), r.getPageRank()), file=sys.stderr)
                 if args.limit > 0 and i == args.limit:
                     break
                 i += 1

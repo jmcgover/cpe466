@@ -239,10 +239,10 @@ def main():
             print("%s\t%s\t\t\t%s" % ("RESULT", "NODE", "PageRank"), file=sys.stderr)
             i = 1
             for r in ranks:
-                print('%d\t%s\t\t\t%.12f' % (i, r.getNodeLabel(), r.getPageRank()), file=sys.stderr)
-                i += 1
+                print('%d\t%s\t\t\t%.24f' % (i, r.getNodeLabel(), r.getPageRank()), file=sys.stderr)
                 if args.limit > 0 and i == args.limit:
                     break
+                i += 1
             print('-' * WIDTH, file=sys.stderr)
         print(TIMING_HEADER)
         print(FMT_STR % (args.filename,d,epsilon,graph.getNumNodes(),graph.getNumEdges(),parseTime,calcTime,results.getIterations()))

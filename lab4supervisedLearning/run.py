@@ -9,6 +9,7 @@ print("hi")
 import os
 import sys
 import argparse
+import csv
 
 sys.path.append(os.getcwd())
 
@@ -42,6 +43,10 @@ def main():
          with open(args.filename) as raw_data:
             print('Processing CSV file: %s' % (args.filename))
             print('use csv library here wooooo')
+            reader = csv.reader(raw_data, delimiter = ',')
+            for row in reader:
+               print(row)
+
       except OSError as e:
          if e.errno == errno.ENOENT:
             print('Could not find file %s' % (args.file))

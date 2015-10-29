@@ -59,6 +59,9 @@ target/
 # Compressed Files
 *.gz
 
+# Data Files
+*data_files*
+
 # Vim Nonsense
 *.*.swp
 *~

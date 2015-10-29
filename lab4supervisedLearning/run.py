@@ -1,5 +1,4 @@
 #! /usr/local/bin/python3
-print("hi")
 
 # CPE 466 Fall 2015
 # Lab 4: Supervised Learning
@@ -42,7 +41,7 @@ def main():
       try:
          with open(args.filename) as raw_data:
             print('Processing CSV file: %s' % (args.filename))
-            print('use csv library here wooooo')
+            print("----------")
             reader = csv.reader(raw_data, delimiter = ',')
             for row in reader:
                print(row)
@@ -55,7 +54,6 @@ def main():
       print('Supplied file is not in CSV format: %s' % (args.filename))
       exit(22)
 
-   print("Got here! Bye bye")
    print("----------")
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
-CC= 	g++
+#CC= 	g++
+CC= 	gcc
 FLAGS= 	-g -Wall -ansi -pedantic -O3 
 LIBS=
 PROGS= 	parse
@@ -15,4 +16,4 @@ clean:
 	rm -fv $(OBJS)
 
 cleanall: clean
-	rm -fv $(PROGS)
+	rm -fv $(PROGS) *.gch

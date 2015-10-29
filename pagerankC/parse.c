@@ -48,15 +48,25 @@ int print_usage(FILE *stream, int argc, char **argv, char *msg) {
  * @param argv   char ** pointer to the array of string arguments
  */
 #define OPT_WIDTH 10
-int print_opt(FILE *stream, char opt_short, char *opt_long, char *description) {
+int print_opt(FILE *stream, char *opt_short, char *opt_long, char *opt_descr) {
+    char *description = "";
+    if (opt_short == NULL && opt_long == NULL && opt_descr == NULL) {
+        return EXIT_SUCCESS;
+    }
+    if (opt_descr == NULL) {
+        description = "";
+    } else {
+        description = opt_descr;
+    }
     if (opt_short && opt_long) {
-        fprintf(stream, "-%c, --%-*s %s", opt_short, OPT_WIDTH, opt_long, description);
+        fprintf(stream, "-%c, --%-*s %s", *opt_short, OPT_WIDTH, opt_long, description);
     } else {
         if (opt_short) {
-            fprintf(stream, "-%c %-*s %s", opt_short, OPT_WIDTH, " ", description);
+            fprintf(stream, "-%c %-*s %s", *opt_short, OPT_WIDTH, " ", description);
         } else if (opt_long) {
             fprintf(stream, "%-*s %s", OPT_WIDTH, opt_long, description);
         } else {
+            fprintf(stream, "%-*s %s", OPT_WIDTH, "", description);
         }
     }
     return EXIT_SUCCESS;

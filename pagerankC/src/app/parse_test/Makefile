@@ -4,3 +4,6 @@ OBJS:= main.o
 PAGERANK_LIBS := argparse/libargparse.a
 
 include ../../app.mk
+
+libs:
+	$(MAKE) -C ../../../

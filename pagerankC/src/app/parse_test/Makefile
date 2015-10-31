@@ -1,9 +1,12 @@
 BIN := parse_test
 OBJS:= main.o
 
-PAGERANK_LIBS := argparse/libargparse.a
+PAGERANK_LIBS := arg_parse/libarg_parse.a
 
 include ../../app.mk
 
 libs:
 	$(MAKE) -C ../../../
+
+cleanall:
+	$(MAKE) -C ../../../ clean

@@ -1,9 +1,10 @@
 SHELL := /bin/bash
 
-lib_argparse := src/lib/argparse
+lib_arg_parse := src/lib/arg_parse
+lib_graph_parse := src/lib/graph_parse
 parse_test := src/app/parse_test/
 
-libraries := $(lib_argparse)
+libraries := $(lib_arg_parse) $(lib_graph_parse) 
 apps := $(parse_test)
 dirs := $(libraries) $(apps)
 

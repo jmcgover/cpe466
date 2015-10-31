@@ -14,10 +14,14 @@
  * @param [in] <argc> {number of arguments}
  * @param [in] <argv> {pointer to the array of string arguments}
  */
-static char     short_options[] = "f:h";
+static char     short_options[] = "f:h:NLSQ";
 static struct   option long_options[] = {
-    {"file", required_argument, NULL, 'f'},
-    {"help", no_argument, NULL, 'h'},
+    {"file",    required_argument, NULL, 'f'},
+    {"help",    no_argument, NULL, 'h'},
+    {"NUM",     no_argument, NULL, 'N'},
+    {"LABEL",   no_argument, NULL, 'L'},
+    {"SNAP",    no_argument, NULL, 'S'},
+    {"QUIET",   no_argument, NULL, 'Q'},
     {0, 0, 0, 0}
 };
 int parse_args(int argc, char **argv, args_t *args) {
@@ -27,6 +31,7 @@ int parse_args(int argc, char **argv, args_t *args) {
     }
     /* Initialize the args struct */
     memset(args, 0, sizeof(args_t));
+    args->type = NONE;
 
     /* Parse Options */
     int c;
@@ -44,10 +49,26 @@ int parse_args(int argc, char **argv, args_t *args) {
                 /* print help options */
                 help_requested = TRUE;
                 break;
+            case 'N':
+                /* NUM type graph */
+                args->type = NUM;
+                break;
+            case 'L':
+                /* LABEL type graph */
+                args->type = LABEL;
+                break;
+            case 'S':
+                /* SNAP type graph */
+                args->type = SNAP;
+                break;
+            case 'Q':
+                /* QUIET type graph */
+                args->type = QUIET;
+                break;
             case '?':
                 break;
             default:
-                fprintf(stderr, "defaul case reached...\n");
+                fprintf(stderr, "default case reached...\n");
         }
     }
     if (help_requested) {
@@ -72,7 +93,7 @@ int parse_args(int argc, char **argv, args_t *args) {
  *                      character}
  */
 #define USAGE_FMT  "usage: %s %s\n"
-#define USAGE_OPTS "[-h | --help] <-f  | --file filename>"
+#define USAGE_OPTS "[-h | --help] [-N | -L | -S] <-f  | --file filename>"
 int print_usage(FILE *stream, int argc, char **argv, char *msg) {
     if (msg) {
         fprintf(stream, "%s\n", msg);
@@ -136,5 +157,12 @@ int print_help(FILE *stream, int argc, char **argv) {
     print_usage(stream, argc, argv, USAGE_DESCR);
     print_opt(stream, "h", "help", "prints this help to stderr and exits");
     print_opt(stream, "f", "file filename", "the filename of the graph file to read");
+    fprintf(stream, "By default, the graph file is loaded and printed.\n");
+    fprintf(stream, "The following mutually exclusive options will \
+                     interpret and store the graph accordingly: \n");
+    print_opt(stream, "N", "NUM", "graph has numbered nodes");
+    print_opt(stream, "L", "LABEL", "graph has labeled nodes");
+    print_opt(stream, "S", "SNAP", "graph is from the SNAP dataset");
+    print_opt(stream, "Q", "QUIET", "same as default but without printing");
     return EXIT_SUCCESS;
 }

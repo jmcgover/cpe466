@@ -1,15 +1,15 @@
 #ifndef GRAPH_PARSE_H
 #define GRAPH_PARSE_H
 
-typedef struct graph_num_record graph_num_record_t;
-struct graph_num_record {
-    long long line_no;
-    long long node_a;
-    long long node_a_val;
-    long long node_b;
-    long long node_b_val;
-};
+#include <stdio.h>
+#include "../../include/graph_types.h"
 
+/* Parse functions */
+int parse_graph_file(FILE *stream, graph_filetype_e type);
 char *parse_graph_num_line(char *beg_line, graph_num_record_t *record);
+
+/* Print functions */
+void fprintf_graph(FILE *stream, graph_num_record_t *record);
+void printf_graph(graph_num_record_t *record);
 
 #endif /* GRAPH_PARSE_H */

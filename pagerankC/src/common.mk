@@ -3,7 +3,7 @@ SHELL := /bin/bash
 CC := gcc
 CFLAGS := -g -O3 -MMD -Wall -Wno-unused-parameter $(EXTRA_CFLAGS)
 LDFLAGS := -pthread
-INCLUDES := -I../../lib
+INCLUDES := -I../../lib -I../../include
 OUTFILE := $(BIN)$(LIB)
 
 .PHONY: default clean

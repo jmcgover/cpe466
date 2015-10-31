@@ -1,9 +1,9 @@
 SHELL := /bin/bash
 
-lib_parse := src/lib/parse
+lib_argparse := src/lib/argparse
 parse_test := src/app/parse_test/
 
-libraries := $(lib_parse)
+libraries := $(lib_argparse)
 apps := $(parse_test)
 dirs := $(libraries) $(apps)
 

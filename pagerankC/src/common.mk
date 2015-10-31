@@ -11,7 +11,7 @@ OUTFILE := $(BIN)$(LIB)
 default: $(OUTFILE)
 
 clean:
-	$(RM) -fv *.o *.gch *~ $(OUTFILE)
+	$(RM) -fv *.o *.gch *~ *.d $(OUTFILE)
 
 -include *.d
 

@@ -1,4 +1,4 @@
-#include "parse.h"
+#include "../../lib/parse/parse.h"
 
 /*
  * Runs the main sequence of instructions

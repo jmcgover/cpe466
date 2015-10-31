@@ -1,19 +1,24 @@
-#CC= 	g++
-CC= 	gcc
-FLAGS= 	-g -Wall -ansi -pedantic -O3 
-LIBS=
-PROGS= 	parse
-OBJS= 	parse.o
+SHELL := /bin/bash
 
-# PARSER
-parse: parse.o main.c
-	$(CC) $(FLAGS) $(LIBS) $^ -o $@
+lib_parse := src/lib/parse
+parse_test := src/app/parse_test/
 
-parse.o: parse.c parse.h
-	$(CC) $(FLAGS) $(LIBS) $^ -c
+libraries := $(lib_parse)
+apps := $(parse_test)
+dirs := $(libraries) $(apps)
+
+.PHONY: all $(apps) $(libraries)
+
+all: $(apps)
+
+$(apps): $(libraries)
+	$(MAKE) -C $@
+
+$(libraries):
+	$(MAKE) -C $@
+	mkdir -p ./lib
+	cp $@/*.a ./lib
 
 clean: 
-	rm -fv $(OBJS)
-
-cleanall: clean
-	rm -fv $(PROGS) *.gch
+	$(RM) bin/* lib/*
+	for DIR in ${dirs}; do make -C $${DIR} clean; done

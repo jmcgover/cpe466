@@ -5,11 +5,12 @@
 #include "../../include/graph_types.h"
 
 /* Parse functions */
-int parse_graph_file(FILE *stream, graph_filetype_e type);
-char *parse_graph_num_line(char *beg_line, graph_num_record_t *record);
+int parse_graph_file(FILE *stream, graph_filetype_e type, graph_record_handler_f handler, void *data);
+char *parse_graph_num_line(char *beg_line, graph_record_handler_f handler, void *data);
+char *parse_graph_span_line(char *beg_line, graph_record_handler_f handler, void *data);
 
 /* Print functions */
-void fprintf_graph(FILE *stream, graph_num_record_t *record);
-void printf_graph(graph_num_record_t *record);
+int fprintf_graph(FILE *stream, graph_num_record_t *record);
+int printf_graph(graph_num_record_t *record);
 
 #endif /* GRAPH_PARSE_H */

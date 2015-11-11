@@ -14,13 +14,14 @@
  * @param [in] <argc> {number of arguments}
  * @param [in] <argv> {pointer to the array of string arguments}
  */
-static char     short_options[] = "f:h:NLSQ";
+static char     short_options[] = "f:h:NLSHQ";
 static struct   option long_options[] = {
     {"file",    required_argument, NULL, 'f'},
     {"help",    no_argument, NULL, 'h'},
     {"NUM",     no_argument, NULL, 'N'},
     {"LABEL",   no_argument, NULL, 'L'},
     {"SNAP",    no_argument, NULL, 'S'},
+    {"HANDLE",  no_argument, NULL, 'H'},
     {"QUIET",   no_argument, NULL, 'Q'},
     {0, 0, 0, 0}
 };
@@ -60,6 +61,10 @@ int parse_args(int argc, char **argv, args_t *args) {
             case 'S':
                 /* SNAP type graph */
                 args->type = SNAP;
+                break;
+            case 'H':
+                /* QUIET type graph */
+                args->type = HANDLE;
                 break;
             case 'Q':
                 /* QUIET type graph */
@@ -163,6 +168,7 @@ int print_help(FILE *stream, int argc, char **argv) {
     print_opt(stream, "N", "NUM", "graph has numbered nodes");
     print_opt(stream, "L", "LABEL", "graph has labeled nodes");
     print_opt(stream, "S", "SNAP", "graph is from the SNAP dataset");
+    print_opt(stream, "H", "HANDLE", "uses the supplied handler to parse the line");
     print_opt(stream, "Q", "QUIET", "same as default but without printing");
     return EXIT_SUCCESS;
 }

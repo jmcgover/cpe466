@@ -83,6 +83,8 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
 
 
 def main():
+   parser = lab4args.getC45Args()
+   parser.parse_args()
    return 0
 
 if __name__ == '__main__':

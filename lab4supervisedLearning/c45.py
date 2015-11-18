@@ -60,4 +60,16 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
          print("Splitting attribute is....")
          print(attrib)
          # TO DO actual data set splits
+         for splitVal in possibleValues[attrib]:
+            print(splitVal)
+            dataCopy = {}
+            for attributes in possibleValues:
+            #   print(attributes)
+               if attributes != attrib:
+                  dataCopy[attributes] = []
+                  for item, match in zip(allDataRows[attributes], allDataRows[attrib]):
+                     if match == splitVal:
+            #        print(item)
+                        dataCopy[attributes].append(item)
+            print(dataCopy)
 

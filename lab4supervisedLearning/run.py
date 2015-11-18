@@ -74,11 +74,15 @@ def main():
 
             # Remove the classification label from the attribute list
             attribs.remove(classification)
+            attribs.remove('Id')
+            del allDataRows['Id']
+            del possibleNumValues['Id']
+            del possibleValues['Id']
 # Debug print statements.....
 #            print("----------")
-#            print(allDataRows)
-#            print(possibleNumValues)
-#            print(possibleValues)
+            print(allDataRows)
+            print(possibleNumValues)
+            print(possibleValues)
             print('CSV file %s processed' % (args.filename))
             print("----------")
             print('Generating Decision Tree via C4.5')

@@ -20,6 +20,13 @@
         TODO;\
     }\
 }
+#define PARSE_TEST_ASSERT_MSG(SUCCESS_COND, msg, TODO) {\
+    if (!(SUCCESS_COND)) {\
+        fprintf(stderr, "%s:%d:%s:(%d)%s: %s\n", \
+            __FILE__, __LINE__, __func__, errno, STRERR, msg);\
+        TODO;\
+    }\
+}
 
 #define MAX(a, b) (a > b ? a : b)
 #define MIN(a, b) (a < b ? a : b)
@@ -90,7 +97,7 @@ int main(int argc, char **argv) {
             printf("Highest node num: %lld\n", highest_node_num);
             for (i = 0; i < 10 + 1; i++) {
                 in_link_nodes = get_in_links(graph, i);
-                num_in_links = get_num_in_links(graph, i);
+                num_in_links = get_nodes_num_in_links(graph, i);
                 printf("-------------------------\n");
                 printf("Node %lld (%lld): ", i, num_in_links);
                 for (j = 0; j < num_in_links; j++) {
@@ -105,6 +112,9 @@ int main(int argc, char **argv) {
             for (i = 0; i < 10; i++) {
                 printf("%lld: %.12f\n", i, pageranks[i]);
             }
+            printf("Calculating pageranks...\n");
+            rtn = calc_pagerank(pr_test);
+            pageranks = get_pageranks(pr_test);
             graph_destroy(graph);
             /*             parse_graph_file(graph_stream, args.type, print_things_snap, &stats); */
             break;

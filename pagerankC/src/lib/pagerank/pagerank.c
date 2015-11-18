@@ -29,6 +29,7 @@ struct pagerank {
     double start_val;           /* Starting value (1/N) */
     long long num_nodes;        /* Number of nodes */
     long long highest_node_num; /* Last node we can index */
+    graph_t *graph;
 };
 
 pagerank_t *pagerank_init(graph_t *graph) {
@@ -78,4 +79,40 @@ pagerank_t *pagerank_init(graph_t *graph) {
 
 double *get_pageranks(pagerank_t *pr) {
     return pr->pageranks;
+}
+
+int calc_pagerank(pagerank_t *pr, double d, double eps) {
+    long long highest_node_num = -1;
+    long long *num_out_links = NULL;
+    long long *num_in_links = NULL;
+    long long **in_link_nodes = NULL;
+    long long i, j, node_num_in_links;
+    double *new_pageranks = NULL;
+
+    /* Input Checking */
+    if (d < 0.0 || d > 1.0) {
+        return EXIT_FAILURE;
+    }
+    if (eps < 0.0) {
+        return EXIT_FAILURE;
+    }
+
+    /* initialize */
+    highest_node_num = get_highest_node_num(pr->graph);
+    num_out_links = get_num_out_links(pr->graph);
+    num_in_links = get_num_in_links(pr->graph);
+    in_link_nodes = get_in_link_nodes(pr->graph);
+
+    /* calculate */
+    do {
+        new_pageranks = calloc(highest_node_num + 1, sizeof(double));
+        for (i = 0; i < highest_node_num + 1; i++) {
+            node_num_in_links = num_in_links[i];
+            for (j = 0; j < node_num_in_links; j++) {
+            }
+        }
+        free(pr->pageranks);
+        pr->pageranks = new_pageranks;
+    } while (pr->max_delta > eps);
+    return EXIT_SUCCESS;
 }

@@ -160,13 +160,23 @@ int add_in_link(graph_t *graph, long long from_node, long long to_node) {
 long long *get_in_links(graph_t *graph, long long node) {
     return graph->in_link_nodes[node];
 }
+
+long long get_nodes_num_in_links(graph_t *graph, long long node) {
+    return graph->num_in_links[node];
+}
 /*
 long long *get_in_edges(graph_t *graph, long long node) {
     return graph->in_link_edges[node];
 }
 */
-long long get_num_in_links(graph_t *graph, long long node) {
-    return graph->num_in_links[node];
+long long **get_in_link_nodes(graph_t *graph) {
+    return graph->in_link_nodes;
+}
+long long *get_num_in_links(graph_t *graph) {
+    return graph->num_in_links;
+}
+long long *get_num_out_links(graph_t *graph) {
+    return graph->num_out_links;
 }
 
 long long get_highest_node_num(graph_t *graph) {
@@ -187,7 +197,6 @@ void graph_num_handler(void *record, void *data) {
     long long to_node;
     long long edge_value;
     */
-
 }
 void graph_snap_handler(void *record, void *data) {
     graph_snap_record_t *parsed = record;

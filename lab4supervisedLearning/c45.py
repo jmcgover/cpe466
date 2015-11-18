@@ -33,4 +33,29 @@ def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
    return gain
 
 # TO DO make a recursive driver for this junk
+def gen_tree(allDataRows, possibleValues, attribs, classification):
+   # Check for stop condition of only 1 category label
+   setSize = len(set(allDataRows[classification]))
+   if setSize == 0:
+      print("only one category label here!")
+
+   # Check for stop condition of no more attributes to split on. Win by plurality.
+   attributes = len(attribs)
+   if attributes == 0:
+      print("no more attributes to split on!")
+
+   # Otherwise, recursive step of selecting the splitting attribute and splitting the data.
+   gains = {}
+   for attribute in attribs:
+      if attribute != classification:
+         gains[attribute] = calc_info_gain(allDataRows, possibleValues, attribute, classification)
+
+#   print(gains)
+#   print(max(gains.values()))
+   maxGain = max(gains.values())
+   for attrib, gain in gains.items():
+      if maxGain == gain:
+         print("Splitting attribute is....")
+         print(attrib)
+         # TO DO actual data set splits
 

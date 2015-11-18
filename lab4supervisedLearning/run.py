@@ -10,7 +10,7 @@ import sys
 import argparse
 import csv
 
-from c45 import calc_entropy, calc_info_gain
+from c45 import calc_entropy, calc_info_gain, gen_tree
 
 sys.path.append(os.getcwd())
 
@@ -72,6 +72,8 @@ def main():
                   if item not in possibleValues[col]:
                      possibleValues[col].append(item)
 
+            # Remove the classification label from the attribute list
+            attribs.remove(classification)
 # Debug print statements.....
 #            print("----------")
 #            print(allDataRows)
@@ -86,6 +88,7 @@ def main():
             print(calc_entropy(allDataRows, possibleValues, classification))
             print(calc_info_gain(allDataRows, possibleValues, 'Gender', classification))
             print(calc_info_gain(allDataRows, possibleValues, 'Age', classification))
+            gen_tree(allDataRows, possibleValues, attribs, classification)
 
 
       except OSError as e:

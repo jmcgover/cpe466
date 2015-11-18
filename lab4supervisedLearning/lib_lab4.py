@@ -3,6 +3,9 @@
 # Jeff McGovern - jmcgover@calpoly.edu
 # Nicole Martin - nlmartin@calpoly.edu
 
+# Contains the implementation of various utility functions that are primarily
+# program and function oriented (as opposed to algorithm related).
+
 import argparse
 import os
 import sys

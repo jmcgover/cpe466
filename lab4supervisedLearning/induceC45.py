@@ -12,7 +12,7 @@ import os
 import sys
 
 sys.path.append(os.getcwd())
-import lab4args
+import lib_lab4
 
 def calc_entropy(allDataRows, possibleValues, classification):
    entropy = 0
@@ -83,7 +83,7 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
 
 
 def main():
-   parser = lab4args.getC45Args()
+   parser = lib_lab4.getC45Args()
    parser.parse_args()
    return 0
 

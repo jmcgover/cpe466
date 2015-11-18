@@ -26,11 +26,13 @@ def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
       for item in allDataRows[splitAttrib]:
          if item == label:
             count += 1
-      prob = float(count/total)
-      gain += prob * math.log(prob,2)
+      if count != 0 and total != 0:
+         prob = float(count/total)
+         gain += prob * math.log(prob,2)
 
-   gain += calc_entropy(allDataRows, possibleValues, classification)
-   return gain
+   entropy = calc_entropy(allDataRows, possibleValues, classification)
+   entropy += gain
+   return entropy
 
 # TO DO make a recursive driver for this junk
 def gen_tree(allDataRows, possibleValues, attribs, classification):

@@ -80,18 +80,18 @@ def main():
             del possibleValues['Id']
 # Debug print statements.....
 #            print("----------")
-            print(allDataRows)
-            print(possibleNumValues)
-            print(possibleValues)
+#            print(allDataRows)
+#            print(possibleNumValues)
+#            print(possibleValues)
             print('CSV file %s processed' % (args.filename))
             print("----------")
             print('Generating Decision Tree via C4.5')
 
             # Entropy Calculation examples
             print('TEST SHIT BELOW need to finish making the recursive driver for splitting')
-            print(calc_entropy(allDataRows, possibleValues, classification))
-            print(calc_info_gain(allDataRows, possibleValues, 'Gender', classification))
-            print(calc_info_gain(allDataRows, possibleValues, 'Age', classification))
+ #           print(calc_entropy(allDataRows, possibleValues, classification))
+ #           print(calc_info_gain(allDataRows, possibleValues, 'Gender', classification))
+ #           print(calc_info_gain(allDataRows, possibleValues, 'Age', classification))
             gen_tree(allDataRows, possibleValues, attribs, classification)
 
 

@@ -10,7 +10,7 @@ import sys
 import argparse
 import csv
 
-from c45 import calc_entropy, calc_info_gain, gen_tree
+from induceC45 import calc_entropy, calc_info_gain, gen_tree
 
 sys.path.append(os.getcwd())
 

@@ -10,6 +10,8 @@ import sys
 import argparse
 import csv
 
+from c45 import calc_entropy, calc_info_gain
+
 sys.path.append(os.getcwd())
 
 
@@ -41,10 +43,50 @@ def main():
       try:
          with open(args.filename) as raw_data:
             print('Processing CSV file: %s' % (args.filename))
-            print("----------")
             reader = csv.reader(raw_data, delimiter = ',')
+
+            # Start processing header rows in the CSV
+            attribs = reader.__next__()
+            numValues = reader.__next__()
+            classAttrib = reader.__next__()
+            classification = classAttrib[0]
+#            print(classification)
+
+            # Create a dictionary with the number of possible
+            # values for each attribute
+            # Also sets up dictionary to list what the possible
+            # attribute labels are and store all data
+            possibleNumValues = {}
+            possibleValues = {}
+            allDataRows = {}
+
+            for col, val in zip(attribs, numValues):
+               possibleNumValues[col] = val
+               possibleValues[col] = []
+               allDataRows[col] = []
+
+            # Process each CSV row into its own dictionary of attributes
             for row in reader:
-               print(row)
+               for col, item in zip(attribs, row):
+                  allDataRows[col].append(item)
+                  if item not in possibleValues[col]:
+                     possibleValues[col].append(item)
+
+# Debug print statements.....
+#            print("----------")
+#            print(allDataRows)
+#            print(possibleNumValues)
+#            print(possibleValues)
+            print('CSV file %s processed' % (args.filename))
+            print("----------")
+            print('Generating Decision Tree via C4.5')
+
+            # Entropy Calculation examples
+            print('TEST SHIT BELOW need to finish making the recursive driver for splitting')
+            print(calc_entropy(allDataRows, possibleValues, classification))
+            print(calc_info_gain(allDataRows, possibleValues, 'Gender', classification))
+            print(calc_info_gain(allDataRows, possibleValues, 'Age', classification))
+
 
       except OSError as e:
          if e.errno == errno.ENOENT:

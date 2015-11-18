@@ -7,12 +7,19 @@
 
 import math
 
+import errno
+import os
+import sys
+
+sys.path.append(os.getcwd())
+import lab4args
+
 def calc_entropy(allDataRows, possibleValues, classification):
    entropy = 0
    total = len(allDataRows[classification])
    for label in possibleValues[classification]:
       count = allDataRows[classification].count(label)
-      prob = float(count/total)
+      prob = float(count)/total
       entropy += prob * math.log(prob, 2)
    entropy *= -1
    return entropy
@@ -46,30 +53,38 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
    if attributes == 0:
       print("no more attributes to split on!")
 
-   # Otherwise, recursive step of selecting the splitting attribute and splitting the data.
-   gains = {}
-   for attribute in attribs:
-      if attribute != classification:
-         gains[attribute] = calc_info_gain(allDataRows, possibleValues, attribute, classification)
+   else:
+      # Otherwise, recursive step of selecting the splitting attribute and splitting the data.
+      gains = {}
+      for attribute in attribs:
+         if attribute != classification:
+            gains[attribute] = calc_info_gain(allDataRows, possibleValues, attribute, classification)
 
-#   print(gains)
-#   print(max(gains.values()))
-   maxGain = max(gains.values())
-   for attrib, gain in gains.items():
-      if maxGain == gain:
-         print("Splitting attribute is....")
-         print(attrib)
-         # TO DO actual data set splits
-         for splitVal in possibleValues[attrib]:
-            print(splitVal)
-            dataCopy = {}
-            for attributes in possibleValues:
-            #   print(attributes)
-               if attributes != attrib:
-                  dataCopy[attributes] = []
-                  for item, match in zip(allDataRows[attributes], allDataRows[attrib]):
-                     if match == splitVal:
-            #        print(item)
-                        dataCopy[attributes].append(item)
-            print(dataCopy)
+   #   print(gains)
+   #   print(max(gains.values()))
+      maxGain = max(gains.values())
+      for attrib, gain in gains.items():
+         if maxGain == gain:
+            print("Splitting attribute is....")
+            print(attrib)
+            # TO DO actual data set splits
+            for splitVal in possibleValues[attrib]:
+               print(splitVal)
+               dataCopy = {}
+               for attributes in possibleValues:
+                  #   print(attributes)
+                  if attributes != attrib:
+                     dataCopy[attributes] = []
+                     for item, match in zip(allDataRows[attributes], allDataRows[attrib]):
+                        if match == splitVal:
+                           #        print(item)
+                           dataCopy[attributes].append(item)
+               print(dataCopy)
 
+
+def main():
+   return 0
+
+if __name__ == '__main__':
+   rtn = main()
+   sys.exit(rtn)

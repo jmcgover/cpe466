@@ -31,7 +31,7 @@ def getC45Args():
          help='XML file containing the domain description for the dataset,'
          );
    argParser.add_argument(
-         'training_file', metavar='<TrainingSetFile.xml>',
+         'training_file', metavar='<TrainingSetFile.csv>',
          help='input training set CSV file'
          );
    argParser.add_argument(
@@ -76,8 +76,56 @@ def getValidationArgs():
          );
    return argParser
 
-def getDataRows():
+def getCSVData(csv_filename):
    allDataRows = None
+   if csv_filename[-4:] != '.csv':
+      print('Supplied file is not in CSV format: %s' % (csv_filename), file=sys.stderr)
+      sys.exit(errno.EINVAL)
+   try:
+      with open(csv_filename) as file:
+         reader = csv.reader(file, delimiter = ',')
+
+         # Process header rows
+         attribs = reader.__next__()
+         numValues = reader.__next__()
+         classAttrib = reader.__next__()
+         classification = classAttrib[0]
+
+         # Create a dictionary with the number of possible
+         #     values for each attribute
+         # Also sets up dictionary to list what the possible
+         #     attribute labels are and store all data
+         possibleNumValues = {}
+         possibleValues = {}
+         allDataRows = {}
+
+         for col, val in zip(attribs, numValues):
+            possibleNumValues[col] = val
+            possibleValues[col] = []
+            allDataRows[col] = []
+
+         # Process each CSV row into its own dictionary of attributes
+         for row in reader:
+            for col, item in zip(attribs, row):
+               allDataRows[col].append(item)
+               if item not in possibleValues[col]:
+                  possibleValues[col].append(item)
+
+         # Remove the classification label from the attribute list
+         attribs.remove(classification)
+         attribs.remove('Id')
+         del allDataRows['Id']
+         del possibleNumValues['Id']
+         del possibleValues['Id']
+   except OSError as e:
+      if e.errno == errno.ENOENT:
+         print('Could not find file %s' % (csv_filename))
+         sys.exit(errno.ENOENT)
+
+      else:
+         raise e
+   except:
+      raise
    return allDataRows
 
 def getXMLTree(filename):

@@ -17,15 +17,17 @@ class Dataset(object):
       self.allDataRows = None
       #self.possibleValues = None
       self.attributes = None
+      self.attributeValues = {}
+      self.attributeCounts = {}
       self.numValues = None
       self.classAttribute = None
       self.classes = None
-      self.attributeValues = {}
       self.dataSize = None
 
       # COPY DATASET
       if dataset:
          assert csv_filename == None
+         assert attribute and value
          # "header" stuff
          attributes = copy.deepcopy(dataset.attributes)
          numValues = copy.deepcopy(dataset.numValues)
@@ -41,20 +43,23 @@ class Dataset(object):
             allDataRows[col] = []
          allDataRows[classAttribute] = []
 
-         # Calculate dataSize
-         dataSize = 0
+         # Calculate length
+         length = 0
          for col in dataset.allDataRows:
-            if dataSize:
-               assert len(dataset.allDataRows[col]) and len(dataset.allDataRows[col]) == dataSize
+            if length:
+               assert len(dataset.allDataRows[col]) and len(dataset.allDataRows[col]) == length
             else:
-               dataSize = len(dataset.allDataRows[col])
+               length = len(dataset.allDataRows[col])
+         dataSize = 0
          if attribute and value:
             # Filter and copy
-            print('dataSize: %d', dataSize)
-            for i in range(0, dataSize - 1):
+            for i in range(0, length):
                if dataset.allDataRows[attribute][i] == value:
+                  dataSize += 1
                   for col in dataset.allDataRows:
                      allDataRows[col].append(dataset.allDataRows[col][i])
+               #else:
+               #   print('%s != %s' % (dataset.allDataRows[attribute][i], value))
          else:
             # Simply copy
             print('dataSize: %d', dataSize)
@@ -124,20 +129,38 @@ class Dataset(object):
       self.attributes = attributes
       for a in attributes:
          self.attributeValues[a] = set(allDataRows[a])
+         self.attributeCounts[a] = {}
+         for val in self.attributeValues[a]:
+            self.attributeCounts[a][val] = allDataRows[a].count(val)
+      self.attributeValues[classAttribute] = set(allDataRows[classAttribute])
+      self.attributeCounts[classAttribute] = {}
+      for val in self.attributeValues[classAttribute]:
+         self.attributeCounts[classAttribute][val] = allDataRows[classAttribute].count(val)
       self.numValues = numValues
       self.classAttribute = classAttribute
       self.classes = set(allDataRows[classAttribute])
       self.dataSize = dataSize
+
    def get_attributes(self):
       return self.attributes
-   def get_attributeValues(self):
-      return self.attributeValues
+   def get_attributeValues(self, attribute):
+      return self.attributeValues[attribute]
    def get_numAttributeValues(self, attribute):
       return len(self.attributeValues[attribute])
+   def count_values(self, attribute, value):
+      return self.attributeCounts[attribute][value]
+
    def get_classAttribute(self):
       return self.classAttribute
    def get_classes(self):
       return self.classes
    def get_numClasses(self):
       return len(self.classes)
-
+   def get_dataSize(self):
+      return self.dataSize
+   def pr(self, attribute, value):
+      return self.count_values(attribute, value) / self.get_dataSize()
+   def pr_c(self, c_j):
+      num_class_c_j = self.count_values(self.classAttribute, c_j)
+      num_examples = self.get_dataSize()
+      return  num_class_c_j / num_examples

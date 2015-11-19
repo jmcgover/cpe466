@@ -21,7 +21,7 @@ def calc_entropy(allDataRows, possibleValues, classification):
    for label in possibleValues[classification]:
       count = allDataRows[classification].count(label)
       if count != 0 and total != 0:
-         prob = float(count)/total
+         prob = float(count/total)
          entropy += prob * math.log(prob, 2)
    entropy *= -1
    return entropy
@@ -31,6 +31,7 @@ def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
    total = len(allDataRows[splitAttrib])
 
    for label in possibleValues[splitAttrib]:
+      print(label)
       gain = 0
       for classLabel in possibleValues[classification]:
          classCount = 0
@@ -43,9 +44,13 @@ def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
          if count != 0 and classCount != 0:
             prob = float(count/classCount)
             gain += prob * math.log(prob,2)
+         print("((%d/%d) * math.log (%d/%d))" % (count,classCount,count,classCount))
       entropy += float(classCount/total) * (-1 * gain)
+#      print("(%d/%d) * (-1 * %f)" % (classCount,total,gain))
+      print("current running sum of entropy %f" % entropy)
 
    entropy = -entropy
+   print(calc_entropy(allDataRows, possibleValues, classification))
    entropy += calc_entropy(allDataRows, possibleValues, classification)
    return entropy
 

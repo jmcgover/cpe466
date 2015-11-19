@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<attributes>
+   <node var="Party">
+      <edge num="1" var="Democratic"/>
+      <edge num="2" var="Republican"/>
+      <edge num="3" var="Independent"/>
+   </node>
+   <node var="Ideology">
+      <edge num="1" var="Liberal"/>
+      <edge num="2" var="Conservative"/>
+      <edge num="3" var="Moderate"/>
+   </node>
+   <node var="Race">
+      <edge num="1" var="Black"/>
+      <edge num="2" var="White"/>
+      <edge num="3" var="Other"/>
+   </node>
+   <node var="Gender">
+      <edge num="1" var="Male"/>
+      <edge num="2" var="Female"/>
+   </node>
+   <node var="Religion">
+      <edge num="1" var="Protestant"/>
+      <edge num="2" var="Catholic"/>
+      <edge num="3" var="Other"/>
+   </node>
+   <node var="Income">
+      <edge num="1" var="Less than 30000"/>
+      <edge num="2" var="30000-49999"/>
+      <edge num="3" var="50000-74999"/>
+      <edge num="4" var="75000-99999"/>
+      <edge num="5" var="100000-149999"/>
+      <edge num="6" var="150000+"/>
+   </node>
+   <node var="Education">
+      <edge num="1" var="H.S. diploma or less"/>
+      <edge num="2" var="College"/>
+      <edge num="3" var="Post-Grad"/>
+   </node>
+   <node var="Age"/>
+   <node var="Region"/>
+   <node var="BushApproval"/>
+</attributes>
+

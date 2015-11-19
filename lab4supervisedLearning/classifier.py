@@ -21,7 +21,7 @@ def print_tree(root):
    return None
 
 def print_tree_rec(node, indents):
-   print("%s%s %s" % ('\t'*indents, node.tag, node.attrib))
+   print("%s%s(%s) %s" % ('----'*indents, node.tag, type(node), node.attrib))
    for child in node:
       print_tree_rec(child, indents + 1)
    return None

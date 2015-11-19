@@ -6,6 +6,7 @@
 # Nicole Martin - nlmartin@calpoly.edu
 
 import math
+import copy
 
 import errno
 import os
@@ -45,12 +46,15 @@ def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
 def gen_tree(allDataRows, possibleValues, attribs, classification):
    # Check for stop condition of only 1 category label
    setSize = len(set(allDataRows[classification]))
-   if setSize == 0:
-      print("only one category label here!")
+   print(setSize)
+   if setSize == 1:
+      print("Only one label - classify vote as: %s" % allDataRows[classification][0])
+      return
 
    # Check for stop condition of no more attributes to split on. Win by plurality.
    attributes = len(attribs)
-   if attributes == 0:
+   print(attributes)
+   if attributes == 1:
       print("no more attributes to split on!")
 
    else:
@@ -79,7 +83,16 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
                         if match == splitVal:
                            #        print(item)
                            dataCopy[attributes].append(item)
-               print(dataCopy)
+           #    print(dataCopy)
+           #    print("possible values~~~~~~~~~~~~")
+               possibleValuesCopy = copy.deepcopy(possibleValues)
+               del possibleValuesCopy[attrib]
+           #    print(possibleValuesCopy)
+           #    print("possible attributes~~~~~~~~~~~~~~~`")
+               attribsCopy = copy.deepcopy(attribs)
+               attribsCopy.remove(attrib)
+            #   print(attribsCopy)
+               gen_tree(dataCopy, possibleValuesCopy, attribsCopy, classification)
 
 
 def main():

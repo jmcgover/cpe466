@@ -20,3 +20,50 @@ Nicole Martin - nlmartin@calpoly.edu
 
 ./run.py -f filename
 
+usage: ./induceC45.py [-h] <domainFile.xml> <TrainingSetFile.csv> [<restrictionsFile.txt>]
+
+Task 1: C4.5 Decision Tree induction
+
+positional arguments:
+  <domainFile.xml>      XML file containing the domain description for the dataset,
+  <TrainingSetFile.csv>
+                        input training set CSV file
+  <restrictionsFile.txt>
+                        TXT file containing a single vector, the size of which is equal to the
+                        number of coumns in the dataset without the category variable, where each
+                        element is 0 or 1 indicating which attributes of the dataset to use when
+                        inducing the decision tree
+
+optional arguments:
+  -h, --help            show this help message and exit
+usage: ./classifier.py [-h] <CSVFile> <XMLFile>
+
+Task 2: Classification
+
+positional arguments:
+  <CSVFile>   CSV file of records to be classified and outputs the classification result for each
+              vector
+  <XMLFile>   XML description of a decision already generated
+
+optional arguments:
+  -h, --help  show this help message and exit
+usage: ./validation.py [-h] <CSVFile> <XMLFile> <N> [<restrictionsFile.txt>]
+
+Task 3: Evaluation
+
+positional arguments:
+  <CSVFile>             CSV file of records to be classified and outputs the classification result
+                        for each vector
+  <XMLFile>             XML description of a decision already generated
+  <N>                   specifies how many-fold the cross-validation has to be:               
+                          N = 0 represents no cross-validation                
+                            (i.e., use entire training set to construct a single classifier)               
+                          N = −1 represents all-but-one cross-validation.
+  <restrictionsFile.txt>
+                        TXT file containing a single vector, the size of which is equal to the
+                        number of coumns in the dataset without the category variable, where each
+                        element is 0 or 1 indicating which attributes of the dataset to use when
+                        inducing the decision tree
+
+optional arguments:
+  -h, --help            show this help message and exit

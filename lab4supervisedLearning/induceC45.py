@@ -20,42 +20,52 @@ def calc_entropy(allDataRows, possibleValues, classification):
    total = len(allDataRows[classification])
    for label in possibleValues[classification]:
       count = allDataRows[classification].count(label)
-      prob = float(count)/total
-      entropy += prob * math.log(prob, 2)
+      if count != 0 and total != 0:
+         prob = float(count)/total
+         entropy += prob * math.log(prob, 2)
    entropy *= -1
    return entropy
 
 def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
-   gain = 0
+   entropy = 0
    total = len(allDataRows[splitAttrib])
 
    for label in possibleValues[splitAttrib]:
-      count = 0
-      for item in allDataRows[splitAttrib]:
-         if item == label:
-            count += 1
-      if count != 0 and total != 0:
-         prob = float(count/total)
-         gain += prob * math.log(prob,2)
+      gain = 0
+      for classLabel in possibleValues[classification]:
+         classCount = 0
+         count = 0
+         for item, classify in zip(allDataRows[splitAttrib], allDataRows[classification]):
+            if item == label:
+               classCount += 1
+               if classify == classLabel:
+                  count += 1
+         if count != 0 and classCount != 0:
+            prob = float(count/classCount)
+            gain += prob * math.log(prob,2)
+      entropy += float(classCount/total) * (-1 * gain)
 
-   entropy = calc_entropy(allDataRows, possibleValues, classification)
-   entropy += gain
+   entropy = -entropy
+   entropy += calc_entropy(allDataRows, possibleValues, classification)
    return entropy
 
 # TO DO make a recursive driver for this junk
 def gen_tree(allDataRows, possibleValues, attribs, classification):
    # Check for stop condition of only 1 category label
    setSize = len(set(allDataRows[classification]))
-   print(setSize)
+#   print("set size of classification labels: %d" % setSize)
+   attributes = len(attribs)
+#   print("number of attributes %d" % attributes)
+
    if setSize == 1:
       print("Only one label - classify vote as: %s" % allDataRows[classification][0])
       return
 
    # Check for stop condition of no more attributes to split on. Win by plurality.
-   attributes = len(attribs)
-   print(attributes)
-   if attributes == 1:
+   elif attributes == 1:
       print("no more attributes to split on!")
+      print(set(allDataRows[classification]))
+      return
 
    else:
       # Otherwise, recursive step of selecting the splitting attribute and splitting the data.
@@ -64,13 +74,12 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
          if attribute != classification:
             gains[attribute] = calc_info_gain(allDataRows, possibleValues, attribute, classification)
 
-   #   print(gains)
-   #   print(max(gains.values()))
+      print(gains)
+ #     print(max(gains.values()))
       maxGain = max(gains.values())
       for attrib, gain in gains.items():
          if maxGain == gain:
-            print("Splitting attribute is....")
-            print(attrib)
+            print("Splitting attribute is.... %s" % attrib)
             # TO DO actual data set splits
             for splitVal in possibleValues[attrib]:
                print(splitVal)
@@ -83,7 +92,7 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
                         if match == splitVal:
                            #        print(item)
                            dataCopy[attributes].append(item)
-           #    print(dataCopy)
+               print(dataCopy)
            #    print("possible values~~~~~~~~~~~~")
                possibleValuesCopy = copy.deepcopy(possibleValues)
                del possibleValuesCopy[attrib]
@@ -92,8 +101,10 @@ def gen_tree(allDataRows, possibleValues, attribs, classification):
                attribsCopy = copy.deepcopy(attribs)
                attribsCopy.remove(attrib)
             #   print(attribsCopy)
-               gen_tree(dataCopy, possibleValuesCopy, attribsCopy, classification)
+               print("recursive call HERE")
+            #   gen_tree(dataCopy, possibleValuesCopy, attribsCopy, classification)
 
+               return
 
 def main():
    parser = lib_lab4.getC45Args()

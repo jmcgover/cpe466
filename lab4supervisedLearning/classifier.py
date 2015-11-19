@@ -16,6 +16,18 @@ import lib_lab4
 from lib_lab4 import getClassifierArgs
 from lib_lab4 import getXMLTree
 
+def print_tree(root):
+   print_tree_rec(root, 0)
+   return None
+
+def print_tree_rec(node, indents):
+   print("%s%s %s" % ('\t'*indents, node.tag, node.attrib))
+   for child in node:
+      print_tree_rec(child, indents + 1)
+   return None
+
+
+
 def main():
    # PARSE
    parser = getClassifierArgs()
@@ -28,9 +40,13 @@ def main():
    # PARSE DECISION TREE
    dec_tree = ElementTree.parse(xml_dec_tree_filename)
    dec_tree_root = dec_tree.getroot()
+
+   # TODO REMOVE DEBUG
+   # Printing Tree
    print(dec_tree_root)
    for n in dec_tree_root:
-      print(n)
+      print("%s %s" % (n.tag, n.attrib))
+   print_tree(dec_tree_root)
 
    # PARSE RECORDS
 

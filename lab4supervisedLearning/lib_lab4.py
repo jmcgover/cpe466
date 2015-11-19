@@ -10,6 +10,8 @@ import argparse
 import os
 import sys
 
+import xml.etree.ElementTree as ElementTree
+
 # ARGUMENTS
 class SmartFormatter(argparse.HelpFormatter):
 
@@ -77,3 +79,8 @@ def getValidationArgs():
 def getDataRows():
    allDataRows = None
    return allDataRows
+
+def getXMLTree(filename):
+   tree = None
+   tree = ElementTree.parse(filename)
+   return tree_root

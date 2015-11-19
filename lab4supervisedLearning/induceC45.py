@@ -27,6 +27,7 @@ def calc_entropy(allDataRows, possibleValues, classification):
    return entropy
 
 def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
+   print(".....echoing splitting attribute.... %s" % splitAttrib)
    entropy = 0
    total = len(allDataRows[splitAttrib])
 
@@ -44,7 +45,7 @@ def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
          if count != 0 and classCount != 0:
             prob = float(count/classCount)
             gain += prob * math.log(prob,2)
-         print("((%d/%d) * math.log (%d/%d))" % (count,classCount,count,classCount))
+         print("%s %s : ((%d/%d) * math.log (%d/%d))" % (label, classLabel, count,classCount,count,classCount))
       entropy += float(classCount/total) * (-1 * gain)
 #      print("(%d/%d) * (-1 * %f)" % (classCount,total,gain))
       print("current running sum of entropy %f" % entropy)

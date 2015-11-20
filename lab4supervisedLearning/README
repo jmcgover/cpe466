@@ -18,7 +18,6 @@
 Jeff McGovern - jmcgover@calpoly.edu
 Nicole Martin - nlmartin@calpoly.edu
 
-./run.py -f filename
 
 usage: ./induceC45.py [-h] <domainFile.xml> <TrainingSetFile.csv> [<restrictionsFile.txt>]
 
@@ -30,7 +29,7 @@ positional arguments:
                         input training set CSV file
   <restrictionsFile.txt>
                         TXT file containing a single vector, the size of which is equal to the
-                        number of coumns in the dataset without the category variable, where each
+                        number of columns in the dataset without the category variable, where each
                         element is 0 or 1 indicating which attributes of the dataset to use when
                         inducing the decision tree
 

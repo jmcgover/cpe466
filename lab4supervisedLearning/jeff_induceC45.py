@@ -72,7 +72,7 @@ def select_splitting_attribute_ratio(D, A, threshold):
       best = None
    return best
 
-def select_splitting_attribute(D, A, threshold):
+def select_splitting_attribute_default(D, A, threshold):
    p_0 = entropy(D)
    p = {}
    gain = {}
@@ -91,63 +91,107 @@ def select_splitting_attribute(D, A, threshold):
    #print('max: %.3f best: %s' % (max_gain, best))
    return best
 
-def build_tree(trainingSet, threshold):
-   root = Element('Tree')
-   allAttributes = trainingSet.get_attributes()
-   decision_tree_rec(trainingSet, allAttributes, root, threshold)
-   return root
+class DecisionTreeBuilder(object):
+   def __init__(self, csv_filename, restrictions_filename = None, ratio=False):
+      print('~' * 20)
+      print(csv_filename)
+      print(restrictions_filename)
+      print(ratio)
+      self.tree = None
+      self.tree_name = csv_filename[:-4]
+      self.restricted = False
+      if restrictions_filename:
+         print('FUCKING RESTRICTED')
+         self.restricted = True
+      else:
+         print('NOT RESTRICTED?!?! %s' % restrictions_filename)
+      print('~' * 20)
+      self.select_splitting_attribute = select_splitting_attribute_default
+      if ratio:
+         self.select_splitting_attribute = select_splitting_attribute_ratio
+      self.trainingSet = Dataset(csv_filename, restrictions_filename)
 
-def decision_tree_rec(D, A, T, threshold):
-   assert D.get_numClasses() > 0
-   if D.get_numClasses() == 1:
-      print('make T a leaf node with labeled with c');
-      decision = ElementTree.SubElement(T, 'decision')
-      decision.set('end', '1')
-      decision.set('choice', D.get_classes().pop())
-   elif len(A) == 0:
-      print('make T a leaf node labeled with the most frequent class')
-      decision = ElementTree.SubElement(T, 'decision')
-      decision.set('end', '1')
-      decision.set('choice', D.get_mostPluralClass())
-   else:
-      print('contains examples belonging to a mixture of classes')
-      A_split = select_splitting_attribute(D, A, threshold)
-      print('SPLITTING ON %s: ', A_split)
-      #A_split = select_splitting_attribute_ratio(D, A, threshold)
-      #print('SPLITTING ON RATIO %s: ', A_split)
-      if A_split == None:
+   def decision_tree_rec(self, D, A, T, threshold):
+      assert D.get_numClasses() > 0
+      if D.get_numClasses() == 1:
+         print('make T a leaf node with labeled with c');
+         decision = ElementTree.SubElement(T, 'decision')
+         decision.set('end', '1')
+         decision.set('choice', D.get_classes().pop())
+      elif len(A) == 0:
+         print('make T a leaf node labeled with the most frequent class')
          decision = ElementTree.SubElement(T, 'decision')
          decision.set('end', '1')
          decision.set('choice', D.get_mostPluralClass())
       else:
-         node = ElementTree.SubElement(T, 'node')
-         node.set('var', A_split)
-         A_A_split = set()
-         for a in A:
-            if a != A:
-               A_A_split.add(a)
-         for v in D.get_attributeValues(A_split):
-            D_v = Dataset(None, None, D, A_split, v)
-            if D_v.get_dataSize() > 0:
-               edge = ElementTree.SubElement(node, 'edge')
-               edge.set('var', v)
-               decision_tree_rec(D_v, A_A_split, edge, threshold)
+         print('contains examples belonging to a mixture of classes')
+         A_split = self.select_splitting_attribute(D, A, threshold)
+         print('SPLITTING ON %s: ', A_split)
+         #A_split = select_splitting_attribute_ratio(D, A, threshold)
+         #print('SPLITTING ON RATIO %s: ', A_split)
+         if A_split == None:
+            decision = ElementTree.SubElement(T, 'decision')
+            decision.set('end', '1')
+            decision.set('choice', D.get_mostPluralClass())
+         else:
+            node = ElementTree.SubElement(T, 'node')
+            node.set('var', A_split)
+            A_A_split = set()
+            for a in A:
+               if a != A:
+                  A_A_split.add(a)
+            for v in D.get_attributeValues(A_split):
+               D_v = Dataset(None, None, D, A_split, v)
+               if D_v.get_dataSize() > 0:
+                  edge = ElementTree.SubElement(node, 'edge')
+                  edge.set('var', v)
+                  self.decision_tree_rec(D_v, A_A_split, edge, threshold)
+   def build_tree(self, threshold):
+      self.tree = Element('Tree')
+      self.tree.set('name',self.tree_name)
+      allAttributes = self.trainingSet.get_attributes()
+      self.decision_tree_rec(self.trainingSet, allAttributes, self.tree, threshold)
+      return self.tree
+   def get_tree(self):
+      return self.tree
+   def get_xml(self, indent='   '):
+      return minidom.parseString(
+            ElementTree.tostring(self.tree)).toprettyxml(indent=indent)
+   def print_tree(self, file=sys.stdout, indent='   '):
+      xml_str = self.get_xml(indent)
+      print(xml_str, file=file)
+      return xml_str
+   def save_tree(self, file=None, indent='   '):
+      if file:
+         return self.print_tree(file, indent)
+      else:
+         xml_filename = self.tree_name
+         if self.restricted:
+            xml_filename += '_restricted'
+         xml_filename += '.xml'
+         with open(self.tree_name + '.xml', 'w') as save_file:
+            xml_str = self.print_tree(save_file, indent)
+         return xml_str
+
 
 def main():
    parser = lib_lab4.getC45Args()
    args = parser.parse_args()
    csv_training_filename = args.training_file
+   restrictions_filename = args.restrictions_file
    threshold = .001
 
-   print('Processing CSV file %s...' % (csv_training_filename))
-   trainingSet = Dataset(csv_filename = csv_training_filename)
+   print('Processing CSV file %s' % (csv_training_filename), end='')
+   if restrictions_filename:
+      print(' with restriction file %s' % restrictions_filename, end='')
+   print('...')
+   builder = DecisionTreeBuilder(csv_training_filename, restrictions_filename)
    print('done!')
-   print("----------")
-   print('Generating Decision Tree via C4.5...')
-   tree = build_tree(trainingSet, threshold)
+   print('Building Decision Tree via C4.5...')
+   tree = builder.build_tree(threshold)
    print('done!')
-   xmlstr = minidom.parseString(ElementTree.tostring(tree)).toprettyxml(indent='   ')
-   print(xmlstr)
+   builder.print_tree()
+   builder.save_tree()
    return 0
 
 if __name__ == '__main__':

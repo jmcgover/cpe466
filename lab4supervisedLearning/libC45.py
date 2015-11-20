@@ -119,17 +119,21 @@ class Dataset(object):
                      restrictions_reader = csv.reader(restrictions_file, delimiter = ',')
                      restrictions = restrictions_reader.__next__()
                      for attribute, restriction_val in zip(attributes, restrictions):
-                        if restriction_val == 0:
+                        if int(restriction_val) == 0:
                            possibleNumValues[attribute] = -1
-                           attributes.remove(attribute)
-               print(attributes)
                attributes.remove(classAttribute)
-               for attribute in possibleNumValues:
+               removedAttributes = set()
+               for attribute in attributes:
                   if int(possibleNumValues[attribute]) <= 0:
-                     attributes.remove(attribute)
+                     removedAttributes.add(attribute)
                      del allDataRows[attribute]
                      #del possibleNumValues[attribute]
                      #del possibleValues[attribute]
+                     print("Removed %s..." % (attribute))
+               for attribute in removedAttributes:
+                  attributes.remove(attribute)
+               print(attributes)
+               print(allDataRows)
 
 
          except OSError as e:

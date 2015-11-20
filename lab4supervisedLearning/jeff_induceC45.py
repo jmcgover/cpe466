@@ -14,6 +14,8 @@ import sys
 import xml.etree.ElementTree as ElementTree
 from   xml.etree.ElementTree import Element
 
+from xml.dom import minidom
+
 sys.path.append(os.getcwd())
 import libC45 as C45
 import lib_lab4
@@ -23,8 +25,8 @@ from libC45 import Dataset
 def entropy(D, A=None):
    sum = 0.0
    if A:
-      for v in D.get_attributeValues(A):
-         D_j = Dataset(None, D, A, v)
+      for v_j in D.get_attributeValues(A):
+         D_j = Dataset(None, D, A, v_j)
          sum += D_j.get_dataSize() / D.get_dataSize() * entropy(D_j)
       #print('Entropy[%s]: %.3f' % (A, sum))
    else:
@@ -57,7 +59,7 @@ def select_splitting_attribute_ratio(D, A, threshold):
    max_gain_ratio = -10
    best = None
    for A_i in gain:
-      print('%-30s: %.3f > %.3f' % (A_i, gainRatio[A_i] , max_gain_ratio))
+      #print('%-30s: %.3f > %.3f' % (A_i, gainRatio[A_i] , max_gain_ratio))
       if gainRatio[A_i] > max_gain_ratio:
          max_gain_ratio = gainRatio[A_i]
          best = A_i
@@ -99,14 +101,37 @@ def decision_tree_rec(D, A, T, threshold):
    assert D.get_numClasses() > 0
    if D.get_numClasses() == 1:
       print('make T a leaf node with labeled with c');
+      decision = ElementTree.SubElement(T, 'decision')
+      decision.set('end', '1')
+      decision.set('choice', D.get_classes().pop())
    elif len(A) == 0:
       print('make T a leaf node labeled with the most frequent class')
+      decision = ElementTree.SubElement(T, 'decision')
+      decision.set('end', '1')
+      decision.set('choice', D.get_mostPluralClass())
    else:
       print('contains examples belonging to a mixture of classes')
-      split_attrib = select_splitting_attribute(D, A, threshold)
-      print('SPLITTING ON %s: ', split_attrib)
-      split_attrib = select_splitting_attribute_ratio(D, A, threshold)
-      print('SPLITTING ON RATIO %s: ', split_attrib)
+      A_split = select_splitting_attribute(D, A, threshold)
+      print('SPLITTING ON %s: ', A_split)
+      #A_split = select_splitting_attribute_ratio(D, A, threshold)
+      #print('SPLITTING ON RATIO %s: ', A_split)
+      if A_split == None:
+         decision = ElementTree.SubElement(T, 'decision')
+         decision.set('end', '1')
+         decision.set('choice', D.get_mostPluralClass())
+      else:
+         node = ElementTree.SubElement(T, 'node')
+         node.set('var', A_split)
+         A_A_split = set()
+         for a in A:
+            if a != A:
+               A_A_split.add(a)
+         for v in D.get_attributeValues(A_split):
+            D_v = Dataset(None, D, A_split, v)
+            if D_v.get_dataSize() > 0:
+               edge = ElementTree.SubElement(node, 'edge')
+               edge.set('var', v)
+               decision_tree_rec(D_v, A_A_split, edge, threshold)
 
 def main():
    parser = lib_lab4.getC45Args()
@@ -119,10 +144,10 @@ def main():
    print('done!')
    print("----------")
    print('Generating Decision Tree via C4.5...')
-   root = build_tree(trainingSet, threshold)
+   tree = build_tree(trainingSet, threshold)
    print('done!')
-   print('Copying trainingset...')
-   newTrainingSet = Dataset(dataset=trainingSet, attribute='Vote', value='Obama')
+   xmlstr = minidom.parseString(ElementTree.tostring(tree)).toprettyxml(indent='   ')
+   print(xmlstr)
    return 0
 
 if __name__ == '__main__':

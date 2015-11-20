@@ -156,6 +156,14 @@ class Dataset(object):
       return self.classes
    def get_numClasses(self):
       return len(self.classes)
+   def get_mostPluralClass(self):
+      max_count = -1
+      max_class = None
+      for c in self.attributeCounts[self.classAttribute]:
+         if self.attributeCounts[self.classAttribute][c] > max_count:
+            max_count = self.attributeCounts[self.classAttribute][c]
+            max_class = c
+      return max_class
    def get_dataSize(self):
       return self.dataSize
    def pr(self, attribute, value):

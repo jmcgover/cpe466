@@ -26,7 +26,7 @@ def entropy(D, A=None):
    sum = 0.0
    if A:
       for v_j in D.get_attributeValues(A):
-         D_j = Dataset(None, D, A, v_j)
+         D_j = Dataset(None, None, D, A, v_j)
          sum += D_j.get_dataSize() / D.get_dataSize() * entropy(D_j)
       #print('Entropy[%s]: %.3f' % (A, sum))
    else:
@@ -40,7 +40,7 @@ def entropy(D, A=None):
 def normalizer(D, A):
    sum = 0.0
    for v in D.get_attributeValues(A):
-      D_j = Dataset(None, D, A, v)
+      D_j = Dataset(None, None, D, A, v)
       pr_A = D_j.get_dataSize() / D.get_dataSize()
       sum +=  pr_A * math.log(pr_A, 2)
    sum = -1 * sum
@@ -127,7 +127,7 @@ def decision_tree_rec(D, A, T, threshold):
             if a != A:
                A_A_split.add(a)
          for v in D.get_attributeValues(A_split):
-            D_v = Dataset(None, D, A_split, v)
+            D_v = Dataset(None, None, D, A_split, v)
             if D_v.get_dataSize() > 0:
                edge = ElementTree.SubElement(node, 'edge')
                edge.set('var', v)

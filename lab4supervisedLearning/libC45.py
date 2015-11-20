@@ -13,7 +13,11 @@ import os
 import sys
 
 class Dataset(object):
-   def __init__(self, csv_filename=None, dataset=None, attribute=None, value=None):
+   def __init__(
+         self,
+         csv_filename=None, restrictions_filename=None,
+         dataset=None, attribute=None, value=None
+      ):
       self.allDataRows = None
       #self.possibleValues = None
       self.attributes = None
@@ -47,7 +51,8 @@ class Dataset(object):
          length = 0
          for col in dataset.allDataRows:
             if length:
-               assert len(dataset.allDataRows[col]) and len(dataset.allDataRows[col]) == length
+               assert len(dataset.allDataRows[col])
+               assert len(dataset.allDataRows[col]) == length
             else:
                length = len(dataset.allDataRows[col])
          dataSize = 0
@@ -72,7 +77,7 @@ class Dataset(object):
          # Check for filename extension
          if csv_filename[-4:] != '.csv':
 
-            print('Supplied file is not in CSV format: %s' % (csv_filename), file=sys.stderr)
+            print('File is not in CSV format: %s' % (csv_filename), file=sys.stderr)
             sys.exit(errno.EINVAL)
          try:
             with open(csv_filename) as file:
@@ -107,6 +112,17 @@ class Dataset(object):
                      #   possibleValues[col].append(item)
 
                # Remove the classAttribute label from the attribute list
+               #     as well as the attributes with no classifications
+               #     or with a val of 0 in the restrictions file
+               if restrictions_filename:
+                  with open(restrictions_filename) as restrictions_file:
+                     restrictions_reader = csv.reader(restrictions_file, delimiter = ',')
+                     restrictions = restrictions_reader.__next__()
+                     for attribute, restriction_val in zip(attributes, restrictions):
+                        if restriction_val == 0:
+                           possibleNumValues[attribute] = -1
+                           attributes.remove(attribute)
+               print(attributes)
                attributes.remove(classAttribute)
                for attribute in possibleNumValues:
                   if int(possibleNumValues[attribute]) <= 0:

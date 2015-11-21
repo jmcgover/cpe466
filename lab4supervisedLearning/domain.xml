@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <domain>
-   <node var="Party">
+   <node var="Political Party">
       <edge num="1" var="Democratic"/>
       <edge num="2" var="Republican"/>
       <edge num="3" var="Independent"/>
@@ -24,7 +24,7 @@
       <edge num="2" var="Catholic"/>
       <edge num="3" var="Other"/>
    </node>
-   <node var="Income">
+   <node var="Family Income">
       <edge num="1" var="Less than 30000"/>
       <edge num="2" var="30000-49999"/>
       <edge num="3" var="50000-74999"/>
@@ -49,7 +49,7 @@
       <edge num="3" var="Midwest"/>
       <edge num="4" var="West"/>
    </node>
-   <node var="BushApproval">
+   <node var="Bush Approval">
       <edge num="1" var="Approve"/>
       <edge num="2" var="Disapprove"/>
    </node>

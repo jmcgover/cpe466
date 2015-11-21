@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 from xml.dom import minidom
 
 def main():
-   attributes = Element('attributes')
+   attributes = Element('domain')
    # Party
    party = ElementTree.SubElement(attributes, 'node')
    democratic = ElementTree.SubElement(party, 'edge')
@@ -118,14 +118,53 @@ def main():
    # Age
    age = ElementTree.SubElement(attributes, 'node')
    age.set('var','Age')
+   from18_29 = ElementTree.SubElement(age, 'edge')
+   from18_29.set('var','18-29')
+   from18_29.set('num','1')
+   from30_44 = ElementTree.SubElement(age, 'edge')
+   from30_44.set('var','30-44')
+   from30_44.set('num','2')
+   from45_64 = ElementTree.SubElement(age, 'edge')
+   from45_64.set('var','45-64')
+   from45_64.set('num','3')
+   over65 = ElementTree.SubElement(age, 'edge')
+   over65.set('var','65+')
+   over65.set('num','4')
 
    # Region
    region = ElementTree.SubElement(attributes, 'node')
    region.set('var','Region')
+   northeast = ElementTree.SubElement(region, 'edge')
+   northeast.set('var','Northeast')
+   northeast.set('num','1')
+   south = ElementTree.SubElement(region, 'edge')
+   south.set('var','South')
+   south.set('num','2')
+   midwest = ElementTree.SubElement(region, 'edge')
+   midwest.set('var','Midwest')
+   midwest.set('num','3')
+   west = ElementTree.SubElement(region, 'edge')
+   west.set('var','West')
+   west.set('num','4')
 
    # Bush Approval
    bush_approval = ElementTree.SubElement(attributes, 'node')
    bush_approval.set('var','BushApproval')
+   approve = ElementTree.SubElement(bush_approval, 'edge')
+   approve.set('var','Approve')
+   approve.set('num','1')
+   disapprove = ElementTree.SubElement(bush_approval, 'edge')
+   disapprove.set('var','Disapprove')
+   disapprove.set('num','2')
+
+   vote = ElementTree.SubElement(attributes, 'node')
+   vote.set('var','Vote')
+   obama = ElementTree.SubElement(vote, 'edge')
+   obama.set('var','Obama')
+   obama.set('num','1')
+   mccain = ElementTree.SubElement(vote, 'edge')
+   mccain.set('var','McCain')
+   mccain.set('num','2')
 
    #ElementTree.dump(attributes)
    xmlstr = minidom.parseString(ElementTree.tostring(attributes)).toprettyxml(indent='   ')

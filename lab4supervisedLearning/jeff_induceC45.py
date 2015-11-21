@@ -26,7 +26,7 @@ def entropy(D, A=None):
    sum = 0.0
    if A:
       for v_j in D.get_attributeValues(A):
-         D_j = Dataset(None, None, D, A, v_j)
+         D_j = Dataset(None, None, None, D, A, v_j)
          sum += D_j.get_dataSize() / D.get_dataSize() * entropy(D_j)
       #print('Entropy[%s]: %.3f' % (A, sum))
    else:
@@ -40,7 +40,7 @@ def entropy(D, A=None):
 def normalizer(D, A):
    sum = 0.0
    for v in D.get_attributeValues(A):
-      D_j = Dataset(None, None, D, A, v)
+      D_j = Dataset(None, None, None, D, A, v)
       pr_A = D_j.get_dataSize() / D.get_dataSize()
       sum +=  pr_A * math.log(pr_A, 2)
    sum = -1 * sum
@@ -92,7 +92,10 @@ def select_splitting_attribute_default(D, A, threshold):
    return best
 
 class DecisionTreeBuilder(object):
-   def __init__(self, csv_filename, restrictions_filename = None, ratio=False):
+   def __init__(self,
+         domain_filename, csv_filename, restrictions_filename = None, 
+         ratio=False
+      ):
       print('~' * 20)
       print(csv_filename)
       print(restrictions_filename)
@@ -109,7 +112,7 @@ class DecisionTreeBuilder(object):
       self.select_splitting_attribute = select_splitting_attribute_default
       if ratio:
          self.select_splitting_attribute = select_splitting_attribute_ratio
-      self.trainingSet = Dataset(csv_filename, restrictions_filename)
+      self.trainingSet = Dataset(domain_filename, csv_filename, restrictions_filename)
 
    def decision_tree_rec(self, D, A, T, threshold):
       assert D.get_numClasses() > 0
@@ -141,7 +144,7 @@ class DecisionTreeBuilder(object):
                if a != A:
                   A_A_split.add(a)
             for v in D.get_attributeValues(A_split):
-               D_v = Dataset(None, None, D, A_split, v)
+               D_v = Dataset(None, None, None, D, A_split, v)
                if D_v.get_dataSize() > 0:
                   edge = ElementTree.SubElement(node, 'edge')
                   edge.set('var', v)
@@ -177,6 +180,7 @@ class DecisionTreeBuilder(object):
 def main():
    parser = lib_lab4.getC45Args()
    args = parser.parse_args()
+   domain_filename = args.domain_file
    csv_training_filename = args.training_file
    restrictions_filename = args.restrictions_file
    threshold = .001
@@ -185,7 +189,8 @@ def main():
    if restrictions_filename:
       print(' with restriction file %s' % restrictions_filename, end='')
    print('...')
-   builder = DecisionTreeBuilder(csv_training_filename, restrictions_filename)
+   builder = \
+      DecisionTreeBuilder(domain_filename, csv_training_filename, restrictions_filename)
    print('done!')
    print('Building Decision Tree via C4.5...')
    tree = builder.build_tree(threshold)

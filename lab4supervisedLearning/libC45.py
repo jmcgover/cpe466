@@ -12,10 +12,12 @@ import csv
 import os
 import sys
 
+import xml.etree.ElementTree as ElementTree
+
 class Dataset(object):
    def __init__(
          self,
-         csv_filename=None, restrictions_filename=None,
+         domain_filename=None, csv_filename=None, restrictions_filename=None,
          dataset=None, attribute=None, value=None
       ):
       self.allDataRows = None
@@ -27,6 +29,7 @@ class Dataset(object):
       self.classAttribute = None
       self.classes = None
       self.dataSize = None
+      self.domain = None
 
       # COPY DATASET
       if dataset:
@@ -71,6 +74,7 @@ class Dataset(object):
             for i in range(0, dataSize - 1):
                for col in dataset.allDataRows:
                   allDataRows[col].append(dataset.allDataRows[col][i])
+         self.domain = dataset.domain
       # BUILD FROM CSV FILE
       if csv_filename:
          assert dataset == None
@@ -132,8 +136,8 @@ class Dataset(object):
                      print("Removed %s..." % (attribute))
                for attribute in removedAttributes:
                   attributes.remove(attribute)
-               print(attributes)
-               print(allDataRows)
+               #print(attributes)
+               #print(allDataRows)
 
 
          except OSError as e:
@@ -160,6 +164,8 @@ class Dataset(object):
       self.classAttribute = classAttribute
       self.classes = set(allDataRows[classAttribute])
       self.dataSize = dataSize
+      if not self.domain:
+         self.domain = Domain(domain_filename)
 
    def get_attributes(self):
       return self.attributes
@@ -192,3 +198,8 @@ class Dataset(object):
       num_class_c_j = self.count_values(self.classAttribute, c_j)
       num_examples = self.get_dataSize()
       return  num_class_c_j / num_examples
+
+class Domain(object):
+   def __init__(self, xml_filename):
+      assert(xml_filename)
+      tree = ElementTree.parse(xml_filename)

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<attributes>
+<domain>
    <node var="Party">
       <edge num="1" var="Democratic"/>
       <edge num="2" var="Republican"/>
@@ -37,8 +37,25 @@
       <edge num="2" var="College"/>
       <edge num="3" var="Post-Grad"/>
    </node>
-   <node var="Age"/>
-   <node var="Region"/>
-   <node var="BushApproval"/>
-</attributes>
+   <node var="Age">
+      <edge num="1" var="18-29"/>
+      <edge num="2" var="30-44"/>
+      <edge num="3" var="45-64"/>
+      <edge num="4" var="65+"/>
+   </node>
+   <node var="Region">
+      <edge num="1" var="Northeast"/>
+      <edge num="2" var="South"/>
+      <edge num="3" var="Midwest"/>
+      <edge num="4" var="West"/>
+   </node>
+   <node var="BushApproval">
+      <edge num="1" var="Approve"/>
+      <edge num="2" var="Disapprove"/>
+   </node>
+   <node var="Vote">
+      <edge num="1" var="Obama"/>
+      <edge num="2" var="McCain"/>
+   </node>
+</domain>
 

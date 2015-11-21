@@ -6,115 +6,213 @@
 # Nicole Martin - nlmartin@calpoly.edu
 
 import math
-import copy
 
 import errno
 import os
 import sys
 
+import xml.etree.ElementTree as ElementTree
+from   xml.etree.ElementTree import Element
+
+from xml.dom import minidom
+
 sys.path.append(os.getcwd())
+import libC45 as C45
 import lib_lab4
+from lib_lab4 import getCSVData
+from libC45 import Dataset
 
-def calc_entropy(allDataRows, possibleValues, classification):
-   entropy = 0
-   total = len(allDataRows[classification])
-   for label in possibleValues[classification]:
-      count = allDataRows[classification].count(label)
-      if count != 0 and total != 0:
-         prob = float(count/total)
-         entropy += prob * math.log(prob, 2)
-   entropy *= -1
-   return entropy
-
-def calc_info_gain(allDataRows, possibleValues, splitAttrib, classification):
-   print(".....echoing splitting attribute.... %s" % splitAttrib)
-   entropy = 0
-   total = len(allDataRows[splitAttrib])
-
-   for label in possibleValues[splitAttrib]:
-      print(label)
-      gain = 0
-      for classLabel in possibleValues[classification]:
-         classCount = 0
-         count = 0
-         for item, classify in zip(allDataRows[splitAttrib], allDataRows[classification]):
-            if item == label:
-               classCount += 1
-               if classify == classLabel:
-                  count += 1
-         if count != 0 and classCount != 0:
-            prob = float(count/classCount)
-            gain += prob * math.log(prob,2)
-         print("%s %s : ((%d/%d) * math.log (%d/%d))" % (label, classLabel, count,classCount,count,classCount))
-      entropy += float(classCount/total) * (-1 * gain)
-#      print("(%d/%d) * (-1 * %f)" % (classCount,total,gain))
-      print("current running sum of entropy %f" % entropy)
-
-   entropy = -entropy
-   print(calc_entropy(allDataRows, possibleValues, classification))
-   entropy += calc_entropy(allDataRows, possibleValues, classification)
-   return entropy
-
-# TO DO make a recursive driver for this junk
-def gen_tree(allDataRows, possibleValues, attribs, classification):
-   # Check for stop condition of only 1 category label
-   setSize = len(set(allDataRows[classification]))
-#   print("set size of classification labels: %d" % setSize)
-   attributes = len(attribs)
-#   print("number of attributes %d" % attributes)
-
-   if setSize == 1:
-      print("Only one label - classify vote as: %s" % allDataRows[classification][0])
-      return
-
-   # Check for stop condition of no more attributes to split on. Win by plurality.
-   elif attributes == 1:
-      print("no more attributes to split on!")
-      print(set(allDataRows[classification]))
-      return
-
+def entropy(D, A=None):
+   sum = 0.0
+   if A:
+      for v_j in D.get_attributeValues(A):
+         D_j = Dataset(None, None, None, D, A, v_j)
+         sum += D_j.get_dataSize() / D.get_dataSize() * entropy(D_j)
+      #print('Entropy[%s]: %.3f' % (A, sum))
    else:
-      # Otherwise, recursive step of selecting the splitting attribute and splitting the data.
-      gains = {}
-      for attribute in attribs:
-         if attribute != classification:
-            gains[attribute] = calc_info_gain(allDataRows, possibleValues, attribute, classification)
+      for c_j in D.get_classes():
+         if D.pr_c(c_j):
+            sum += D.pr_c(c_j) * math.log(D.pr_c(c_j), 2)
+      sum = -1 * sum
+      #print('Entropy: %.3f' % (sum))
+   return sum
 
-      print(gains)
- #     print(max(gains.values()))
-      maxGain = max(gains.values())
-      for attrib, gain in gains.items():
-         if maxGain == gain:
-            print("Splitting attribute is.... %s" % attrib)
-            # TO DO actual data set splits
-            for splitVal in possibleValues[attrib]:
-               print(splitVal)
-               dataCopy = {}
-               for attributes in possibleValues:
-                  #   print(attributes)
-                  if attributes != attrib:
-                     dataCopy[attributes] = []
-                     for item, match in zip(allDataRows[attributes], allDataRows[attrib]):
-                        if match == splitVal:
-                           #        print(item)
-                           dataCopy[attributes].append(item)
-               print(dataCopy)
-           #    print("possible values~~~~~~~~~~~~")
-               possibleValuesCopy = copy.deepcopy(possibleValues)
-               del possibleValuesCopy[attrib]
-           #    print(possibleValuesCopy)
-           #    print("possible attributes~~~~~~~~~~~~~~~`")
-               attribsCopy = copy.deepcopy(attribs)
-               attribsCopy.remove(attrib)
-            #   print(attribsCopy)
-               print("recursive call HERE")
-            #   gen_tree(dataCopy, possibleValuesCopy, attribsCopy, classification)
+def normalizer(D, A):
+   sum = 0.0
+   for v in D.get_attributeValues(A):
+      D_j = Dataset(None, None, None, D, A, v)
+      pr_A = D_j.get_dataSize() / D.get_dataSize()
+      sum +=  pr_A * math.log(pr_A, 2)
+   sum = -1 * sum
+   #print('Normalizer: %.3f' % (sum))
+   return sum
 
-               return
+def select_splitting_attribute_ratio(D, A, threshold):
+   p_0 = entropy(D)
+   p = {}
+   gain = {}
+   gainRatio = {}
+   for A_i in D.get_attributes():
+      p[A_i] = entropy(D, A_i)
+      gain[A_i] = p_0 - p[A_i]
+      gainRatio[A_i] = gain[A_i] / normalizer(D, A_i)
+   max_gain_ratio = -10
+   best = None
+   for A_i in gain:
+      #print('%-30s: %.3f > %.3f' % (A_i, gainRatio[A_i] , max_gain_ratio))
+      if gainRatio[A_i] > max_gain_ratio:
+         max_gain_ratio = gainRatio[A_i]
+         best = A_i
+   #print(p_0)
+   #print(p)
+   #print(gain)
+   #print(gainRatio)
+   #print('max_ratio: %.3f best: %s gain %.3f' % (max_gain_ratio, best, gain[best]))
+   if gain[best] <= threshold:
+      best = None
+   return best
+
+def select_splitting_attribute_default(D, A, threshold):
+   p_0 = entropy(D)
+   p = {}
+   gain = {}
+   for A_i in D.get_attributes():
+      p[A_i] = entropy(D, A_i)
+      gain[A_i] = p_0 - p[A_i]
+   max_gain = threshold
+   best = None
+   for A_i in gain:
+      if gain[A_i] > max_gain:
+         max_gain = gain[A_i]
+         best = A_i
+   #print(p_0)
+   #print(p)
+   #print(gain)
+   #print('max: %.3f best: %s' % (max_gain, best))
+   return best
+
+class DecisionTreeBuilder(object):
+   def __init__(self,
+         domain_filename, csv_filename, restrictions_filename = None,
+         ratio=False
+      ):
+      print('~' * 20)
+      print(csv_filename)
+      print(restrictions_filename)
+      print(ratio)
+      self.tree = None
+      self.tree_name = csv_filename[:-4]
+      self.tree_name = os.path.splitext(csv_filename)[0]
+      self.restricted = False
+      if restrictions_filename:
+         print('FUCKING RESTRICTED')
+         self.restricted = True
+      else:
+         print('NOT RESTRICTED?!?! %s' % restrictions_filename)
+      print('~' * 20)
+      self.select_splitting_attribute = select_splitting_attribute_default
+      if ratio:
+         self.select_splitting_attribute = select_splitting_attribute_ratio
+      self.trainingSet = Dataset(domain_filename, csv_filename, restrictions_filename)
+
+   def decision_tree_rec(self, D, A, T, threshold):
+      assert D.get_numClasses() > 0
+      if D.get_numClasses() == 1:
+         print('make T a leaf node with labeled with c');
+         classification = D.get_classes().pop()
+         print('FUCK')
+         print(classification)
+         num, choice = D.get_num_choice_tuple(D.get_classAttribute(), classification)
+
+         decision = ElementTree.SubElement(T, 'decision')
+         decision.set('end', '1')
+         decision.set('num', num)
+         decision.set('choice', choice)
+      elif len(A) == 0:
+         print('make T a leaf node labeled with the most frequent class')
+         classification = D.get_mostPluralClass()
+         num, choice = D.get_num_choice_tuple(D.get_classAttribute(), classification)
+
+         decision = ElementTree.SubElement(T, 'decision')
+         decision.set('end', '1')
+         decision.set('num', num)
+         decision.set('choice', choice)
+      else:
+         print('contains examples belonging to a mixture of classes')
+         A_split = self.select_splitting_attribute(D, A, threshold)
+         print('SPLITTING ON %s: ', A_split)
+         #A_split = select_splitting_attribute_ratio(D, A, threshold)
+         #print('SPLITTING ON RATIO %s: ', A_split)
+         if A_split == None:
+            decision = ElementTree.SubElement(T, 'decision')
+            decision.set('end', '1')
+            decision.set('choice', D.get_mostPluralClass())
+         else:
+            node = ElementTree.SubElement(T, 'node')
+            node.set('var', A_split)
+            AminusA_split = set()
+            for a in A:
+               if a != A:
+                  AminusA_split.add(a)
+            for v in D.get_attributeValues(A_split):
+               D_v = Dataset(None, None, None, D, A_split, v)
+               if D_v.get_dataSize() > 0:
+                  edge = ElementTree.SubElement(node, 'edge')
+                  num, var = D_v.get_num_choice_tuple(A_split, v)
+                  edge.set('var', var)
+                  edge.set('num', num)
+                  self.decision_tree_rec(D_v, AminusA_split, edge, threshold)
+               else:
+                  print('IGNORING %s' % str(v))
+   def build_tree(self, threshold):
+      self.tree = Element('Tree')
+      self.tree.set('name',self.tree_name)
+      allAttributes = self.trainingSet.get_attributes()
+      self.decision_tree_rec(self.trainingSet, allAttributes, self.tree, threshold)
+      return self.tree
+   def get_tree(self):
+      return self.tree
+   def get_xml(self, indent='   '):
+      return minidom.parseString(
+            ElementTree.tostring(self.tree)).toprettyxml(indent=indent)
+   def print_tree(self, file=sys.stdout, indent='   '):
+      xml_str = self.get_xml(indent)
+      print(xml_str, file=file)
+      return xml_str
+   def save_tree(self, file=None, indent='   '):
+      if file:
+         return self.print_tree(file, indent)
+      else:
+         xml_filename = self.tree_name
+         if self.restricted:
+            xml_filename += '_restricted'
+         xml_filename += '.xml'
+         with open(self.tree_name + '.xml', 'w') as save_file:
+            xml_str = self.print_tree(save_file, indent)
+         return xml_str
+
 
 def main():
    parser = lib_lab4.getC45Args()
-   parser.parse_args()
+   args = parser.parse_args()
+
+   domain_filename = args.domain_file
+   csv_training_filename = args.training_file
+   restrictions_filename = args.restrictions_file
+   threshold = .001
+
+   print('Processing CSV file %s' % (csv_training_filename), end='')
+   if restrictions_filename:
+      print(' with restriction file %s' % restrictions_filename, end='')
+   print('...')
+   builder = \
+      DecisionTreeBuilder(domain_filename, csv_training_filename, restrictions_filename)
+   print('done!')
+   print('Building Decision Tree via C4.5...')
+   tree = builder.build_tree(threshold)
+   print('done!')
+   builder.print_tree()
+   builder.save_tree()
    return 0
 
 if __name__ == '__main__':

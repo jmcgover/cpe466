@@ -18,7 +18,7 @@ class Dataset(object):
    def __init__(
          self,
          domain_filename=None, csv_filename=None, restrictions_filename=None,
-         dataset=None, attribute=None, value=None
+         dataset=None, attribute=None, value_tuple=None
       ):
       self.allDataRows = None
       #self.possibleValues = None
@@ -34,7 +34,6 @@ class Dataset(object):
       # COPY DATASET
       if dataset:
          assert csv_filename == None
-         assert attribute and value
          # "header" stuff
          attributes = copy.deepcopy(dataset.attributes)
          numValues = copy.deepcopy(dataset.numValues)
@@ -59,10 +58,11 @@ class Dataset(object):
             else:
                length = len(dataset.allDataRows[col])
          dataSize = 0
-         if attribute and value:
+         if attribute and value_tuple:
             # Filter and copy
             for i in range(0, length):
-               if dataset.allDataRows[attribute][i] == value:
+               value = dataset.allDataRows[attribute][i]
+               if value == value_tuple[0] or value == value_tuple[1]:
                   dataSize += 1
                   for col in dataset.allDataRows:
                      allDataRows[col].append(dataset.allDataRows[col][i])
@@ -170,7 +170,11 @@ class Dataset(object):
    def get_attributes(self):
       return self.attributes
    def get_attributeValues(self, attribute):
-      return self.attributeValues[attribute]
+      all_tuples = self.domain.get_all_num_choice_tuples(attribute)
+      return all_tuples
+   def get_classValues(self):
+      class_tuples = self.domain.get_all_num_choice_tuples(self.classAttribute)
+      return class_tuples
    def get_numAttributeValues(self, attribute):
       return len(self.attributeValues[attribute])
    def count_values(self, attribute, value):
@@ -199,15 +203,19 @@ class Dataset(object):
       num_examples = self.get_dataSize()
       return  num_class_c_j / num_examples
    def get_num_choice_tuple(self, attribute, value):
+      string = 'fuck'
       num = None
       choice = None
-      print('ATTR: %s VALUE: %s' % (attribute, value))
-      try:
-         num = self.domain.get_num(attribute, value)
-         choice = self.domain.get_choice(attribute, num)
-      except KeyError as e:
-         choice = self.domain.get_choice(attribute, value)
-         num = self.domain.get_num(attribute, choice)
+      print('ATTR: %s VALUE: %s TYPE: %s' % (attribute, value, type(value)))
+      if isinstance(value, str):
+         try:
+            num = self.domain.get_num(attribute, value)
+            choice = self.domain.get_choice(attribute, num)
+         except KeyError as e:
+            choice = self.domain.get_choice(attribute, value)
+            num = self.domain.get_num(attribute, choice)
+      else:
+         num, choice = value
       return (num, choice)
 
 class Domain(object):
@@ -219,6 +227,7 @@ class Domain(object):
       assert domain.tag == 'domain'
 
       self.attributes = set()
+      self.num_choice_tuples = {}
       self.num_by_choice = {}
       self.choice_by_num = {}
       for node in domain:
@@ -227,6 +236,7 @@ class Domain(object):
          attribute = node.attrib['var']
 
          self.attributes.add(attribute)
+         self.num_choice_tuples[attribute] = set()
          self.num_by_choice[attribute] = {}
          self.choice_by_num[attribute] = {}
 
@@ -237,6 +247,7 @@ class Domain(object):
             num = edge.attrib['num']
             choice = edge.attrib['var']
 
+            self.num_choice_tuples[attribute].add((num, choice))
             self.num_by_choice[attribute][choice] = num
             self.choice_by_num[attribute][num] = choice
 
@@ -257,4 +268,5 @@ class Domain(object):
       return self.num_by_choice[attribute]
    def get_all_choices(self, attribute):
       return self.choice_by_num[attribute]
-
+   def get_all_num_choice_tuples(self, attribute):
+      return self.num_choice_tuples[attribute]

@@ -18,14 +18,17 @@ class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
         # this is the RawTextHelpFormatter._split_lines
         if text.startswith('R|'):
-            return text[2:].splitlines()  
+            return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
 
 DESCRIPTION_C45 = 'Task 1: C4.5 Decision Tree induction'
 COL_C45 = '90'
-def getC45Args():
+def getC45Args(description=None):
    # os.environ['COLUMNS'] = COL_C45
-   argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION_C45)
+   if description:
+      argParser = argparse.ArgumentParser(prog=sys.argv[0], description=description, formatter_class=SmartFormatter)
+   else:
+      argParser = argparse.ArgumentParser(prog=sys.argv[0], description=DESCRIPTION_C45)
    argParser.add_argument(
          'domain_file', metavar='<domainFile.xml>',
          help='XML file containing the domain description for the dataset,'
@@ -62,17 +65,13 @@ DESCRIPTION_VALIDATION = 'Task 3: Evaluation'
 COL_VALIDATION = '90'
 def getValidationArgs():
    # os.environ['COLUMNS'] = COL_VALIDATION
-   argParser = getClassifierArgs(DESCRIPTION_VALIDATION)
+   argParser = getC45Args(DESCRIPTION_VALIDATION)
    argParser.add_argument(
          'n', metavar='<N>', type=int,
          help='R|specifies how many-fold the cross-validation has to be:\
                \n  N = 0 represents no cross-validation \
                \n    (i.e., use entire training set to construct a single classifier)\
-               \n  N = −1 represents all-but-one cross-validation.'
-         );
-   argParser.add_argument(
-         'restrictions_file', metavar='<restrictionsFile.txt>', nargs='?', default=None,
-         help='TXT file containing a single vector, the size of which is equal to the number of coumns in the dataset without the category variable, where each element is 0 or 1 indicating which attributes of the dataset to use when inducing the decision tree'
+               \n  N = 1 represents all-but-one cross-validation.'
          );
    return argParser
 

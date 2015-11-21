@@ -93,7 +93,7 @@ def select_splitting_attribute_default(D, A, threshold):
 
 class DecisionTreeBuilder(object):
    def __init__(self,
-         domain_filename, csv_filename, restrictions_filename = None, 
+         domain_filename, csv_filename, restrictions_filename = None,
          ratio=False
       ):
       print('~' * 20)
@@ -118,14 +118,24 @@ class DecisionTreeBuilder(object):
       assert D.get_numClasses() > 0
       if D.get_numClasses() == 1:
          print('make T a leaf node with labeled with c');
+         classification = D.get_classes().pop()
+         print('FUCK')
+         print(classification)
+         num, choice = D.get_num_choice_tuple(D.get_classAttribute(), classification)
+
          decision = ElementTree.SubElement(T, 'decision')
          decision.set('end', '1')
-         decision.set('choice', D.get_classes().pop())
+         decision.set('num', num)
+         decision.set('choice', choice)
       elif len(A) == 0:
          print('make T a leaf node labeled with the most frequent class')
+         classification = D.get_mostPluralClass()
+         num, choice = D.get_num_choice_tuple(D.get_classAttribute(), classification)
+
          decision = ElementTree.SubElement(T, 'decision')
          decision.set('end', '1')
-         decision.set('choice', D.get_mostPluralClass())
+         decision.set('num', num)
+         decision.set('choice', choice)
       else:
          print('contains examples belonging to a mixture of classes')
          A_split = self.select_splitting_attribute(D, A, threshold)
@@ -147,7 +157,9 @@ class DecisionTreeBuilder(object):
                D_v = Dataset(None, None, None, D, A_split, v)
                if D_v.get_dataSize() > 0:
                   edge = ElementTree.SubElement(node, 'edge')
-                  edge.set('var', v)
+                  num, var = D_v.get_num_choice_tuple(A_split, v)
+                  edge.set('var', var)
+                  edge.set('num', num)
                   self.decision_tree_rec(D_v, A_A_split, edge, threshold)
    def build_tree(self, threshold):
       self.tree = Element('Tree')

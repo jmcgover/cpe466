@@ -22,7 +22,7 @@ def main():
    republican = ElementTree.SubElement(party, 'edge')
    independent = ElementTree.SubElement(party, 'edge')
 
-   party.set('var', 'Party')
+   party.set('var', 'Political Party')
    democratic.set('var', 'Democratic')
    democratic.set('num', '1')
    republican.set('var', 'Republican')
@@ -82,7 +82,7 @@ def main():
 
    # Income
    income = ElementTree.SubElement(attributes, 'node')
-   income.set('var','Income')
+   income.set('var','Family Income')
    less30000 = ElementTree.SubElement(income, 'edge')
    less30000.set('var','Less than 30000')
    less30000.set('num','1')
@@ -149,7 +149,7 @@ def main():
 
    # Bush Approval
    bush_approval = ElementTree.SubElement(attributes, 'node')
-   bush_approval.set('var','BushApproval')
+   bush_approval.set('var','Bush Approval')
    approve = ElementTree.SubElement(bush_approval, 'edge')
    approve.set('var','Approve')
    approve.set('num','1')

@@ -198,8 +198,63 @@ class Dataset(object):
       num_class_c_j = self.count_values(self.classAttribute, c_j)
       num_examples = self.get_dataSize()
       return  num_class_c_j / num_examples
+   def get_num_choice_tuple(self, attribute, value):
+      num = None
+      choice = None
+      print('ATTR: %s VALUE: %s' % (attribute, value))
+      try:
+         num = self.domain.get_num(attribute, value)
+         choice = self.domain.get_choice(attribute, num)
+      except KeyError as e:
+         choice = self.domain.get_choice(attribute, value)
+         num = self.domain.get_num(attribute, choice)
+      return (num, choice)
 
 class Domain(object):
    def __init__(self, xml_filename):
       assert(xml_filename)
       tree = ElementTree.parse(xml_filename)
+      domain = tree.getroot()
+      print(domain.tag)
+      assert domain.tag == 'domain'
+
+      self.attributes = set()
+      self.num_by_choice = {}
+      self.choice_by_num = {}
+      for node in domain:
+         assert node.tag == 'node'
+         assert node.attrib['var']
+         attribute = node.attrib['var']
+
+         self.attributes.add(attribute)
+         self.num_by_choice[attribute] = {}
+         self.choice_by_num[attribute] = {}
+
+         for edge in node:
+            assert edge.tag == 'edge'
+            assert edge.attrib['num']
+            assert edge.attrib['var']
+            num = edge.attrib['num']
+            choice = edge.attrib['var']
+
+            self.num_by_choice[attribute][choice] = num
+            self.choice_by_num[attribute][num] = choice
+
+   def print(self, file=sys.stdout):
+      for attribute in self.attributes:
+         print("ATTRIBUTE %s" % attribute)
+         print("\t%s INDEXED BY NUM" % (attribute))
+         for choice in self.num_by_choice[attribute]:
+            print('\t\t%s: %s' % (choice, self.num_by_choice[attribute][choice]))
+         print("\t%s INDEXED BY CHOICE" % (attribute))
+         for num in self.choice_by_num[attribute]:
+            print('\t\t%s: %s' % (num, self.choice_by_num[attribute][num]))
+   def get_num(self, attribute, choice):
+      return self.num_by_choice[attribute][choice]
+   def get_choice(self, attribute, num):
+      return self.choice_by_num[attribute][num]
+   def get_all_nums(self, attribute):
+      return self.num_by_choice[attribute]
+   def get_all_choices(self, attribute):
+      return self.choice_by_num[attribute]
+

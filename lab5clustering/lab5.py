@@ -25,6 +25,12 @@ def get_arg_parser(description):
          formatter_class=SmartFormatter
          )
 
+HELP_HEADER= 'R|name of the CSV file containing the input dataset\'s header'
+HELP_HEADER+='\n'
+HELP_HEADER+='\n  If [Header_Filename] IS NOT provided, the program will deduce the header'
+HELP_HEADER+='\n  file from the data filename by prepending \'header_\' to it and using a'
+HELP_HEADER+='\n  \'.txt\' extension instead'
+
 DESCRIPTION_KMEANS = 'k-Means Clustering'
 COL_KMEANS = '90'
 def get_k_means_args(description=DESCRIPTION_KMEANS):
@@ -37,20 +43,24 @@ def get_k_means_args(description=DESCRIPTION_KMEANS):
          'k', metavar='<k>', type=int,
          help='number of clusters the program has to produce'
          );
+   arg_parser.add_argument(
+         'header_filename', metavar='Header_Filename', default=None, nargs='?',
+         help=HELP_HEADER
+         );
    return arg_parser
 
 DESCRIPTION_HIERARCHICAL = 'Hierarchical Clustering'
 COL_HIERARCHICAL = '80'
-HELP_HIERARCHICAL= 'R|optional threshold at which your program will "cut" the '
-HELP_HIERARCHICAL+='\ncluster hierarchy to report the clusters:'
-HELP_HIERARCHICAL+='\n'
-HELP_HIERARCHICAL+='\n  If <threshold> parameter IS specified in the input, your'
-HELP_HIERARCHICAL+='\n  program shall produce both the cluster hierarchy, and the'
-HELP_HIERARCHICAL+='\n  appropriate list of clusters cut at the specified'
-HELP_HIERARCHICAL+='\n  threshold.'
-HELP_HIERARCHICAL+='\n'
-HELP_HIERARCHICAL+='\n  If <threshold> parameter IS NOT specified in the input, your'
-HELP_HIERARCHICAL+='\n  program shall produce the cluster hierarchy alone.'
+HELP_HTHRESHOLD= 'R|optional threshold at which the program will "cut" the '
+HELP_HTHRESHOLD+='\ncluster hierarchy to report the clusters:'
+HELP_HTHRESHOLD+='\n'
+HELP_HTHRESHOLD+='\n  If <threshold> parameter IS specified in the input, the'
+HELP_HTHRESHOLD+='\n  program shall produce both the cluster hierarchy, and the'
+HELP_HTHRESHOLD+='\n  appropriate list of clusters cut at the specified'
+HELP_HTHRESHOLD+='\n  threshold.'
+HELP_HTHRESHOLD+='\n'
+HELP_HTHRESHOLD+='\n  If <threshold> parameter IS NOT specified in the input, the'
+HELP_HTHRESHOLD+='\n  program shall produce the cluster hierarchy alone.'
 def get_hierarchical_args(description=DESCRIPTION_HIERARCHICAL):
    os.environ['COLUMNS'] = COL_HIERARCHICAL
    arg_parser = get_arg_parser(description)
@@ -60,6 +70,10 @@ def get_hierarchical_args(description=DESCRIPTION_HIERARCHICAL):
          );
    arg_parser.add_argument(
          'threshold', metavar='<threshold>', type=float,
-         help=HELP_HIERARCHICAL
+         help=HELP_HTHRESHOLD
+         );
+   arg_parser.add_argument(
+         'header_filename', metavar='Header_Filename', default=None, nargs='?',
+         help=HELP_HEADER
          );
    return arg_parser

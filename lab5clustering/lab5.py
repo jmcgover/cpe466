@@ -25,11 +25,20 @@ def get_arg_parser(description):
          formatter_class=SmartFormatter
          )
 
+def get_header_filename(csv_filename):
+   basename = os.path.basename(csv_filename)
+   filename, extension = os.path.splitext(basename)
+   assert extension == '.csv'
+   directory = os.path.dirname(csv_filename)
+   header_basename = 'header_' + filename + '.txt'
+   header_filename = os.path.join(directory, header_basename)
+   return header_filename
+
 HELP_HEADER= 'R|name of the CSV file containing the input dataset\'s header'
 HELP_HEADER+='\n'
 HELP_HEADER+='\n  If [Header_Filename] IS NOT provided, the program will deduce the header'
-HELP_HEADER+='\n  file from the data filename by prepending \'header_\' to it and using a'
-HELP_HEADER+='\n  \'.txt\' extension instead'
+HELP_HEADER+='\n  file from the data filename by prepending \'header_\' to it, using a'
+HELP_HEADER+='\n  \'.txt\' extension instead, and looking in the working directory.'
 
 DESCRIPTION_KMEANS = 'k-Means Clustering'
 COL_KMEANS = '90'

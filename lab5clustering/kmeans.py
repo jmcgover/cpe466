@@ -27,7 +27,7 @@ def main():
    data_filename = args.csv_filename
    if args.header_filename:
       header_filename = args.header_filename
-   else:
+   elif args.infer_header:
       header_filename = get_header_filename(data_filename)
    k = args.k
    print('Data   Filename: %s' % data_filename)

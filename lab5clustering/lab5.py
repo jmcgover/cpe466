@@ -56,6 +56,9 @@ def get_k_means_args(description=DESCRIPTION_KMEANS):
          'header_filename', metavar='Header_Filename', default=None, nargs='?',
          help=HELP_HEADER
          );
+   arg_parser.add_argument('-i', '--infer-header',
+         action='store_true',
+         help='infer the header from the data file filename')
    return arg_parser
 
 DESCRIPTION_HIERARCHICAL = 'Hierarchical Clustering'
@@ -85,4 +88,7 @@ def get_hierarchical_args(description=DESCRIPTION_HIERARCHICAL):
          'header_filename', metavar='Header_Filename', default=None, nargs='?',
          help=HELP_HEADER
          );
+   arg_parser.add_argument('-i', '--infer-header',
+         action='store_true',
+         help='infer the header from the data file filename')
    return arg_parser

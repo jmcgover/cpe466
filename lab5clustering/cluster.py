@@ -20,8 +20,8 @@ class Dataset(object):
          with open(header_filename) as header_file:
             csv_reader = csv.reader(header_file, delimiter=',')
             attributes = csv_reader.__next__()
-         # END   READ HEADER FILE
       self.attributes = attributes
+      # END   READ HEADER FILE
 
       # BEGIN READ DATA FILE
       restrictions = None

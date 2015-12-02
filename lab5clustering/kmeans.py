@@ -7,13 +7,43 @@
 
 import errno
 import os
+import random
 import sys
+
+import distances
+from distances import euclidean_distance
 
 sys.path.append(os.getcwd())
 import cluster
 from cluster import Dataset
 import lab5
 from  lab5 import get_header_filename
+
+class KMeans(object):
+   def __init__(self, distance = euclidean_distance):
+      self.distance = distance
+
+   def select_initial_clusters(self, D, k):
+      clusters = []
+      rand_indices = random.sample(range(D.size()), k)
+      for i in rand_indices:
+         clusters.append(D.get_single_point(i))
+      return clusters
+
+   def disk_k_means(self, D, k):
+      assert k < D.size(), 'k(%d) is larger than data(%d)' % (k, D.size())
+      clusters = None
+      means = self.select_initial_clusters(D, k)
+      repeat = True
+      while repeat:
+         family = k*[None]
+         num_points = k*[0]
+         clusters = k*[[]]
+         print('family: %s' % family)
+         print('num_points: %s' % num_points)
+         print('clusters: %s' % clusters)
+         repeat = False
+      return clusters
 
 def main():
 
@@ -39,6 +69,8 @@ def main():
    print(dataset.get_attributes())
    for d in dataset.get_datapoints():
       print(d)
+   k_means = KMeans()
+   k_means.disk_k_means(dataset, k)
 
    return 0
 

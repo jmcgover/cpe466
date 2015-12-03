@@ -55,7 +55,7 @@ class Dataset(object):
       return self.datapoints
    def size(self):
       return len(self.datapoints)
-   def dim(self):
+   def dimensions(self):
       return self.dim
    def get_single_point(self, ndx):
       assert ndx < self.size()

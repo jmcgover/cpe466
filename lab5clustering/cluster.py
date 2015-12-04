@@ -83,3 +83,49 @@ class Dataset(object):
       return self.attributes
    def get_restrictions(self):
       return self.restrictions
+
+def squared_error(mean, cluster, distance):
+   error = 0.0
+   for x in cluster:
+      error += distance(x, mean)
+   return error
+
+def sum_squared_error(k, means, clusters, distance):
+   error = 0.0
+   for j in range(k):
+      error += squared_error(means[j], clusters[j], distance)
+   return error
+
+def print_stats(dataset, algorithm, clusters, centroids, file=sys.stdout):
+   num = 0
+   empty_clusters = set()
+   for j,cluster,centroid in zip(range(len(clusters)),clusters,centroids):
+      print('Cluster %d:' % (j))
+      print('\tCenter: %s' % (centroid,))
+      print('\tSize: %d' % (len(cluster)))
+      if len(cluster):
+         max,min,avg,sse = algorithm.calc_stats(centroid, cluster)
+         print('\tMax Dist. to Center: %.6f' % (max))
+         print('\tMin Dist. to Center: %.6f' % (min))
+         print('\tAvg Dist. to Center: %.6f' % (avg))
+         print('\tSum Squared Error  : %.6f' % (sse))
+         print('\tDatapoints: ')
+         if dataset.attributes:
+            print('\t\t%s' % dataset.attributes)
+         for d in cluster:
+            if dataset.unused_data:
+               print('\t\t%s' % (dataset.unused_data[d],), end=' ')
+            print('\t\t%s' % (d,))
+      else:
+         print('\tCluster %d is empty. Choose a k smaller than %d please.' % \
+               (j,k), file=sys.stderr)
+         empty_clusters.add(j)
+      num += len(cluster)
+      print('--------------------')
+   print('Num Empty clusters: %d' % len(empty_clusters))
+   if len(empty_clusters):
+      print('Empty Clusters: ', end='')
+      for j in empty_clusters:
+         print('%d ' % j, end='')
+      print()
+   return num

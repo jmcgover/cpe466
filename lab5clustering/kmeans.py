@@ -18,22 +18,16 @@ import pprint
 from pprint import PrettyPrinter
 
 sys.path.append(os.getcwd())
+
 import cluster
 from cluster import Dataset
+from cluster import print_stats
+from cluster import squared_error
+from cluster import sum_squared_error
+
 import lab5
 from  lab5 import get_header_filename
-
-def squared_error(mean, cluster, distance):
-   error = 0.0
-   for x in cluster:
-      error += distance(x, mean)
-   return error
-
-def sum_squared_error(k, means, clusters, distance):
-   error = 0.0
-   for j in range(k):
-      error += squared_error(means[j], clusters[j], distance)
-   return error
+from  lab5 import get_distance_metric
 
 def count_reassignments(prev_clusters, clusters):
    reassignments = None;
@@ -148,11 +142,11 @@ class KMeans(object):
       return means, clusters
 
 def main():
-
    # PARSE ARGS
    data_filename = None
    header_filename = None
    k = None
+   distance_metric = None
 
    parser = lab5.get_k_means_args()
    args = parser.parse_args()
@@ -162,6 +156,8 @@ def main():
    elif args.infer_header:
       header_filename = get_header_filename(data_filename)
    k = args.k
+   distance_metric = get_distance_metric(args)
+
    print('Data   Filename: %s' % data_filename)
    print('Header Filename: %s' % header_filename)
    print('k              : %d' % k)
@@ -170,43 +166,13 @@ def main():
    dataset = Dataset(data_filename, header_filename)
 
    # CALC K MEANS
-   k_means = KMeans()
+   k_means = KMeans(distance_metric)
    centroids, clusters = k_means.disk_k_means(dataset, k)
-   num = 0
-   empty_clusters = set()
    assert len(centroids) == len(clusters) and len(clusters) == k
-   for j,centroid,cluster in zip(range(k),centroids,clusters):
-      print('Cluster %d:' % (j))
-      print('\tCenter: %s' % (centroid,))
-      print('\tSize: %d' % (len(cluster)))
-      if len(cluster):
-         max,min,avg,sse = k_means.calc_stats(centroid, cluster)
-         print('\tMax Dist. to Center: %.6f' % (max))
-         print('\tMin Dist. to Center: %.6f' % (min))
-         print('\tAvg Dist. to Center: %.6f' % (avg))
-         print('\tSum Squared Error  : %.6f' % (sse))
-         print('\tDatapoints: ')
-         if dataset.attributes:
-            print('\t\t%s' % dataset.attributes)
-         for d in cluster:
-            if dataset.unused_data:
-               print('\t\t%s' % (dataset.unused_data[d],), end=' ')
-            print('\t\t%s' % (d,))
-      else:
-         print('\tCluster %d is empty. Choose a k smaller than %d please.' % \
-               (j,k), file=sys.stderr)
-         empty_clusters.add(j)
-      num += len(cluster)
-      print('--------------------')
+   num = print_stats(dataset, k_means, clusters, centroids)
    assert num == dataset.size(), 'num(%d) != D.size(%d)' % (num, dataset.size())
-   print('Num Empty clusters: %d' % len(empty_clusters))
-   if len(empty_clusters):
-      print('Empty Clusters: ', end='')
-      for j in empty_clusters:
-         print('%d ' % j, end='')
-      print()
-
-
+   print('Datapoints clustered: %d' % num)
+   print('Datapoints total    : %d' % dataset.size())
    return 0
 
 if __name__ == '__main__':

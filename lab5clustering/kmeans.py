@@ -71,7 +71,7 @@ class KMeans(object):
       for x in cluster:
          distances.append(self.distance(x, centroid))
       try :
-         return min(distances), max(distances), sum(distances)/len(distances),\
+         return max(distances), min(distances), sum(distances)/len(distances),\
                squared_error(centroid, cluster, self.distance)
       except ValueError as e:
          print('FUCCCCCCCCCCCCKKKKKKKKKK')

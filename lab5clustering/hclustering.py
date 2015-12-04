@@ -100,10 +100,17 @@ class Agglomerative(object):
       return (s,r)
    def agglomerative(self, D):
       all_clusters = []
+      elements = []
       for x in D:
          cluster = [x]
          all_clusters.append(cluster)
+         leaf_cluster = ElementTree.Element('leaf')
+         leaf_cluster.set('height', 0.0)
+         leaf_cluster.set('data',str(x))
+         elements.append(leaf_cluster)
       pprint.pprint(all_clusters)
+      for e in elements:
+         pprint.pprint(e.attrib)
       while len(all_clusters) > 1:
          print('--------')
          a,b = self.find_closest_clusters(all_clusters)

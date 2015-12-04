@@ -84,7 +84,7 @@ def complete_link(distance, c_x, c_y):
 
 def average_link(distance, c_x, c_y):
    distances = calc_all_distances(distance, c_x, c_y)
-   return sum(distances) / (len(c_x), len(c_y))
+   return sum(distances) / (len(c_x) + len(c_y))
 
 def centroid_method(distance, c_x, c_y):
    centroid_x = calc_centroid(c_x)
@@ -224,14 +224,18 @@ def get_clusters(tree, threshold):
    return trimmed_tree, centroids, clusters
 
 def get_cluster_distance(args):
-   if args.single:
-      return single_link
    if args.complete:
+      print('Using Complete-Link')
       return complete_link
    if args.average:
+      print('Using Average-Link')
       return average_link
    if args.centroid:
+      print('Using Centroid-Method')
       return centroid_method
+   if args.single:
+      print('Using Single-Link')
+      return single_link
 
 def main():
 

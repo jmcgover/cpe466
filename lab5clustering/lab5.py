@@ -144,11 +144,15 @@ def get_hierarchical_args(description=DESCRIPTION_HIERARCHICAL):
    return arg_parser
 
 def get_distance_metric(args):
-   if args.euclidean:
-      return euclidean_distance
    if args.taxicab:
+      print('Using Manhattan')
       return manhattan_distance
    if args.dot:
+      print('Using Dot')
       return dot
    if args.pearson:
-      return pearson_distance
+      print('Using Pearson')
+      return pearson_correlation
+   if args.euclidean:
+      print('Using Euclidean')
+      return euclidean_distance

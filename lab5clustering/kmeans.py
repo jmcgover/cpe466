@@ -180,6 +180,7 @@ def main():
          print('\tMax Dist. to Center: %.6f' % (max))
          print('\tMin Dist. to Center: %.6f' % (min))
          print('\tAvg Dist. to Center: %.6f' % (avg))
+         print('\tSum Squared Error  : %.6f' % (sse))
       else:
          print('\tCluster %d is empty. Choose a k smaller than %d please.' % (j,k), file=sys.stderr)
          empty_clusters.add(j)

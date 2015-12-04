@@ -36,12 +36,15 @@ class Dataset(object):
                dim += 1
          assert not attributes or len(restrictions) == len(attributes)
          for row in csv_reader:
-            assert len(row) == len(restrictions)
-            datapoint = []
-            for i in range(len(restrictions)):
-               if restrictions[i] == '1':
-                  datapoint.append(float(row[i]))
-            datapoints.append(datapoint)
+            if len(row):
+               assert len(row) == len(restrictions), \
+                  'row(%d) != restrictions(%d) %s' % \
+                  (len(row), len(restrictions), data_filename)
+               datapoint = []
+               for i in range(len(restrictions)):
+                  if restrictions[i] == '1':
+                     datapoint.append(float(row[i]))
+               datapoints.append(datapoint)
       # END   READ DATA FILE
 
       # ASSIGN MEMBER VARS

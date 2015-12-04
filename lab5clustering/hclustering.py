@@ -81,14 +81,15 @@ class Agglomerative(object):
    def cluster_distance(self, c_x, c_y):
       return self.agglomerate_method(self.distance, c_x, c_y)
    def find_closest_clusters(self, clusters):
-      c_s, c_r = None, None
+      s, r = None, None
       min_dist = None
-      for c_x, c_y in itertools.combinations(clusters, 2):
-         dist = self.cluster_distance(c_x, c_y)
-         if min_dist == None or dist < min_dist:
-            min_dist = dist
-            c_s, c_r = c_x, c_y
-      return c_s,c_r
+      for i in range(len(clusters)):
+         for j in range(len(clusters)):
+            dist = self.cluster_distance(clusters[i], clusters[j])
+            if i != j and (min_dist == None or dist < min_dist):
+               min_dist = dist
+               s,r = i,j
+      return min_dist, (s, r)
    def arg_min(self, d):
       (s,r) = (-1,-1)
       min_dist = None
@@ -101,6 +102,8 @@ class Agglomerative(object):
    def agglomerative(self, D):
       all_clusters = []
       elements = []
+
+      # INITIALIZE CLUSTERS
       for x in D:
          cluster = [x]
          all_clusters.append(cluster)
@@ -113,17 +116,25 @@ class Agglomerative(object):
          pprint.pprint(e.attrib)
       while len(all_clusters) > 1:
          print('--------')
-         a,b = self.find_closest_clusters(all_clusters)
-         #pprint.pprint(a)
-         #pprint.pprint(b)
+
+         # FIND CLOSEST CLUSTERS
+         dist,(s,r) = self.find_closest_clusters(all_clusters)
+
+         # EXTRACT CLUSTERS
+         a = all_clusters[s]
+         b = all_clusters[r]
          all_clusters.remove(a)
          all_clusters.remove(b)
+
+         # AGGLOMERATE
          new_cluster = []
          new_cluster.extend(a)
          new_cluster.extend(b)
-         all_clusters.append(new_cluster)
-         pprint.pprint(all_clusters)
          #pprint.pprint(new_cluster)
+
+         # ADD THE NEW CLUSTER
+         all_clusters.append(new_cluster)
+         #pprint.pprint(all_clusters)
       print('len(all_clusters): {0}'.format(len(all_clusters)))
 
 def main():

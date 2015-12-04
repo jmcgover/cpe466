@@ -82,7 +82,7 @@ def get_hierarchical_args(description=DESCRIPTION_HIERARCHICAL):
          help='name of the CSV file containing the input dataset'
          );
    arg_parser.add_argument(
-         'threshold', metavar='<threshold>', type=float,
+         'threshold', metavar='threshold', type=float, default=None, nargs='?',
          help=HELP_HTHRESHOLD
          );
    arg_parser.add_argument(

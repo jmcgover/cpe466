@@ -53,7 +53,6 @@ class Dataset(object):
                      datapoint.append(float(row[i]))
                   else:
                      unused_data_tracked = True
-                     print('APPENDING %s' % (row[i]))
                      unused_info.append(row[i])
                datapoint = tuple(datapoint)
                if len(unused_info):

@@ -10,7 +10,13 @@ import json
 import os
 import sys
 
+import collections
+from collections import Counter
+
+import itertools
+import pprint
 import xml.etree.ElementTree as ElementTree
+
 
 sys.path.append(os.getcwd())
 import cluster
@@ -20,6 +26,8 @@ from  lab5 import get_header_filename
 
 import distances
 from distances import euclidean_distance
+
+pprint.PrettyPrinter(indent=2)
 
 def set_default(obj):
     if isinstance(obj, set):
@@ -53,7 +61,7 @@ def complete_link(distance, c_x, c_y):
 
 def average_link(distance, c_x, c_y):
    distances = calc_all_distances(distance, c_x, c_y)
-   return avg(distances)
+   return sum(distances) / (len(c_x), len(c_y))
 
 def centroid_method(distance, c_x, c_y):
    centroid_x = calc_centroid(c_x)
@@ -66,13 +74,21 @@ def wards_methods(distance, c_x, c_y):
 class Agglomerative(object):
    def __init__(self,
          distance = euclidean_distance,
-         cluster_distance = single_link,
+         agglomerate_method = single_link,
          ):
       self.distance = distance
-      self.cluster_distance = cluster_distance
-   def d(self, c_x, c_y):
-      return self.cluster_distance(self.distance, c_x, c_y)
-      return 0
+      self.agglomerate_method = agglomerate_method
+   def cluster_distance(self, c_x, c_y):
+      return self.agglomerate_method(self.distance, c_x, c_y)
+   def find_closest_clusters(self, clusters):
+      c_s, c_r = None, None
+      min_dist = None
+      for c_x, c_y in itertools.combinations(clusters, 2):
+         dist = self.cluster_distance(c_x, c_y)
+         if min_dist == None or dist < min_dist:
+            min_dist = dist
+            c_s, c_r = c_x, c_y
+      return c_s,c_r
    def arg_min(self, d):
       (s,r) = (-1,-1)
       min_dist = None
@@ -83,6 +99,25 @@ class Agglomerative(object):
                s,r = (j,k)
       return (s,r)
    def agglomerative(self, D):
+      all_clusters = []
+      for x in D:
+         cluster = [x]
+         all_clusters.append(cluster)
+      pprint.pprint(all_clusters)
+      while len(all_clusters) > 1:
+         print('--------')
+         a,b = self.find_closest_clusters(all_clusters)
+         #pprint.pprint(a)
+         #pprint.pprint(b)
+         all_clusters.remove(a)
+         all_clusters.remove(b)
+         new_cluster = []
+         new_cluster.extend(a)
+         new_cluster.extend(b)
+         all_clusters.append(new_cluster)
+         pprint.pprint(all_clusters)
+         #pprint.pprint(new_cluster)
+      print('len(all_clusters): {0}'.format(len(all_clusters)))
 
 def main():
 
@@ -101,7 +136,7 @@ def main():
    threshold = args.threshold
    print('Data   Filename: %s' % data_filename)
    print('Header Filename: %s' % header_filename)
-   print('Threshold      : %.3f' % threshold)
+   print('Threshold      : %.3f' % threshold) if threshold else None
 
    # READ DATA
    dataset = Dataset(data_filename, header_filename)

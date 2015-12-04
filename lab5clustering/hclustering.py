@@ -15,7 +15,10 @@ from collections import Counter
 
 import itertools
 import pprint
+
 import xml.etree.ElementTree as ElementTree
+from   xml.etree.ElementTree import Element
+from xml.dom import minidom
 
 
 sys.path.append(os.getcwd())
@@ -40,6 +43,7 @@ def calc_all_distances(distance, c_x, c_y):
       for y in c_y:
          distances.add(distance(x,y))
    return distances
+
 
 def calc_centroid(cluster):
    sum = None
@@ -78,6 +82,14 @@ class Agglomerative(object):
          ):
       self.distance = distance
       self.agglomerate_method = agglomerate_method
+      self.tree = None
+   def get_xml(self, indent='   '):
+      return minidom.parseString(
+            ElementTree.tostring(self.tree)).toprettyxml(indent=indent)
+   def print_tree(self, file=sys.stdout, indent='   '):
+      xml_str = self.get_xml(indent)
+      print(xml_str, file=file)
+      return xml_str
    def cluster_distance(self, c_x, c_y):
       return self.agglomerate_method(self.distance, c_x, c_y)
    def find_closest_clusters(self, clusters):
@@ -101,41 +113,53 @@ class Agglomerative(object):
       return (s,r)
    def agglomerative(self, D):
       all_clusters = []
-      elements = []
+      all_elements = []
 
       # INITIALIZE CLUSTERS
       for x in D:
          cluster = [x]
          all_clusters.append(cluster)
          leaf_cluster = ElementTree.Element('leaf')
-         leaf_cluster.set('height', 0.0)
+         leaf_cluster.set('height', '0.0')
          leaf_cluster.set('data',str(x))
-         elements.append(leaf_cluster)
+         all_elements.append(leaf_cluster)
       pprint.pprint(all_clusters)
-      for e in elements:
+      for e in all_elements:
          pprint.pprint(e.attrib)
       while len(all_clusters) > 1:
-         print('--------')
+         #print('--------')
 
          # FIND CLOSEST CLUSTERS
-         dist,(s,r) = self.find_closest_clusters(all_clusters)
+         min_dist,(s,r) = self.find_closest_clusters(all_clusters)
 
          # EXTRACT CLUSTERS
          a = all_clusters[s]
          b = all_clusters[r]
          all_clusters.remove(a)
          all_clusters.remove(b)
+         a_elem = all_elements[s]
+         b_elem = all_elements[r]
+         all_elements.remove(a_elem)
+         all_elements.remove(b_elem)
 
          # AGGLOMERATE
          new_cluster = []
          new_cluster.extend(a)
          new_cluster.extend(b)
+         new_element = ElementTree.Element('node')
+         new_element.set('height', '%.3f' % min_dist)
+         new_element.append(a_elem)
+         new_element.append(b_elem)
          #pprint.pprint(new_cluster)
 
          # ADD THE NEW CLUSTER
          all_clusters.append(new_cluster)
+         all_elements.append(new_element)
          #pprint.pprint(all_clusters)
       print('len(all_clusters): {0}'.format(len(all_clusters)))
+      self.tree = all_elements[0]
+      self.tree.tag = 'tree'
+      self.print_tree()
 
 def main():
 

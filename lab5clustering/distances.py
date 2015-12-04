@@ -23,7 +23,7 @@ def dot(x, y):
    return dotProduct
 
 def euclidean_distance(x, y):
-   assert len(x) == len(y)
+   assert len(x) == len(y), 'x: %s y: %s' % (x,y)
    sumSquares = 0.0
    for i,j in zip(x, y):
       sumSquares += (i - j) * (i - j)

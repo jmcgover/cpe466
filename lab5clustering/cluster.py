@@ -3,9 +3,12 @@
 # Jeff McGovern - jmcgover@calpoly.edu
 # Nicole Martin - nlmartin@calpoly.edu
 
+import collections
 import csv
 import os
 import sys
+
+from collections import defaultdict
 
 class Dataset(object):
    def __init__(self, data_filename, header_filename=None):
@@ -13,6 +16,7 @@ class Dataset(object):
       self.datapoints = None
       self.dim = None
       self.restrictions = None
+      self.unused_data = None
 
       # BEGIN READ HEADER FILE
       self.attributes = None
@@ -27,6 +31,8 @@ class Dataset(object):
       # BEGIN READ DATA FILE
       restrictions = None
       datapoints = []
+      unused_data = defaultdict(list)
+      unused_data_tracked = False
       dim = 0
       with open(data_filename) as data_file:
          csv_reader = csv.reader(data_file, delimiter=',')
@@ -41,14 +47,25 @@ class Dataset(object):
                   'row(%d) != restrictions(%d) %s' % \
                   (len(row), len(restrictions), data_filename)
                datapoint = []
+               unused_info = []
                for i in range(len(restrictions)):
                   if restrictions[i] == '1':
                      datapoint.append(float(row[i]))
+                  else:
+                     unused_data_tracked = True
+                     print('APPENDING %s' % (row[i]))
+                     unused_info.append(row[i])
+               datapoint = tuple(datapoint)
+               if len(unused_info):
+                  unused_info = tuple(unused_info)
                datapoints.append(datapoint)
+               unused_data[datapoint].append(unused_info)
       # END   READ DATA FILE
 
       # ASSIGN MEMBER VARS
       self.datapoints = datapoints
+      if unused_data_tracked:
+         self.unused_data = unused_data
       self.dim = dim
       self.restrictions = restrictions
    def __iter__(self):

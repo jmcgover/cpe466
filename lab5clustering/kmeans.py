@@ -14,6 +14,9 @@ import sys
 import distances
 from distances import euclidean_distance
 
+import pprint
+from pprint import PrettyPrinter
+
 sys.path.append(os.getcwd())
 import cluster
 from cluster import Dataset
@@ -68,7 +71,8 @@ class KMeans(object):
       for x in cluster:
          distances.append(self.distance(x, centroid))
       try :
-         return min(distances), max(distances), sum(distances)/len(distances), squared_error(centroid, cluster, self.distance)
+         return min(distances), max(distances), sum(distances)/len(distances),\
+               squared_error(centroid, cluster, self.distance)
       except ValueError as e:
          print('FUCCCCCCCCCCCCKKKKKKKKKK')
          print(distances)
@@ -173,7 +177,7 @@ def main():
    assert len(centroids) == len(clusters) and len(clusters) == k
    for j,centroid,cluster in zip(range(k),centroids,clusters):
       print('Cluster %d:' % (j))
-      print('\tCenter: %s' % (centroid))
+      print('\tCenter: %s' % (centroid,))
       print('\tSize: %d' % (len(cluster)))
       if len(cluster):
          max,min,avg,sse = k_means.calc_stats(centroid, cluster)
@@ -182,10 +186,15 @@ def main():
          print('\tAvg Dist. to Center: %.6f' % (avg))
          print('\tSum Squared Error  : %.6f' % (sse))
          print('\tDatapoints: ')
+         if dataset.attributes:
+            print('\t\t%s' % dataset.attributes)
          for d in cluster:
-            print('\t\t%s' % (d))
+            if dataset.unused_data:
+               print('\t\t%s' % (dataset.unused_data[d],), end=' ')
+            print('\t\t%s' % (d,))
       else:
-         print('\tCluster %d is empty. Choose a k smaller than %d please.' % (j,k), file=sys.stderr)
+         print('\tCluster %d is empty. Choose a k smaller than %d please.' % \
+               (j,k), file=sys.stderr)
          empty_clusters.add(j)
       num += len(cluster)
       print('--------------------')

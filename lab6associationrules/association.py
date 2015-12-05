@@ -13,9 +13,46 @@ sys.path.append(os.getcwd())
 import lab6
 
 import bakery
-from bakery import MarketBasketTransactions
 from bakery import GoodsDatabase
 from bakery import Good
+
+class MarketBasketTransactions(object):
+   def __init__(self, csv_filename):
+      self.baskets = None
+      self.num_transactions = None
+      self.item_counts = None
+
+      # PARSE BASKETS
+      baskets = {}
+      item_counts = defaultdict(int)
+      with open(csv_filename) as transactions_file:
+         csv_reader = csv.reader(transactions_file, delimiter=',')
+         # for each transaction
+         for record in csv_reader:
+            data = [int(e) for e in record] # convert str to int
+            # Add transaction to dataset as set of item ids
+            baskets[data[0]] = set(data[1:])
+            # Increment number of transactions each item shows up in
+            for item in baskets[data[0]]:
+               item_counts[item] += 1
+      self.baskets = baskets
+      self.num_transactions = len(baskets)
+      self.item_counts = item_counts
+   def get_items(self):
+      return self.item_counts.keys()
+   def get_num_transactions(self):
+      return self.num_transactions
+   def count(self, X):
+      count = 0
+      for id,transaction in self.baskets.items():
+         if X.issubset(transaction):
+            count += 1
+      return count
+   def support(self, X):
+      support_count = self.count(X)
+      return support_count / self.num_transactions
+   def confidence(self, X, Y):
+      return self.count(X.union(Y)) / self.count(X)
 
 def main():
    # PARSE ARGS
@@ -31,18 +68,6 @@ def main():
    goods_db = GoodsDatabase('goods.csv')
    # BUILD BASKETS
    transactions = MarketBasketTransactions(data_filename)
-   for item in transactions.get_items():
-      item_set = set()
-      item_set.add(item)
-      print('Item {0}: {1}'.format(item, transactions.support(item_set)))
-   for x in transactions.get_items():
-      X = set()
-      X.add(x)
-      for y in transactions.get_items():
-         Y = set()
-         Y.add(y)
-         transactions.confidence(X,Y)
-
    return 0
 
 if __name__ == '__main__':

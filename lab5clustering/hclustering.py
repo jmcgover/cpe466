@@ -193,19 +193,20 @@ def get_all_clusters(tree):
    get_all_clusters_rec(clusters, tree)
    return clusters
 def get_all_clusters_rec(clusters, element):
+   if element.tag == 'leaf':
+      clusters.append(element.attrib['data'])
    for e in element:
-      if e.tag == 'leaf':
-         clusters.append(e.attrib['data'])
-      else:
-         get_all_clusters_rec(clusters, e)
+      get_all_clusters_rec(clusters, e)
 
 def get_branches_rec(branches, element, threshold):
    for e in element:
-      if e.tag == 'tree' or e.tag == 'node':
+      if e.tag == 'tree' or e.tag == 'node' or e.tag == 'trimmed_tree':
          if float(e.attrib['height']) < threshold:
             branches.append(e)
          else:
             get_branches_rec(branches, e, threshold)
+      elif e.tag == 'leaf':
+         branches.append(e)
 
 def get_clusters(tree, threshold):
    centroids = None
@@ -218,7 +219,11 @@ def get_clusters(tree, threshold):
    for b in branches:
       trimmed_tree.append(b)
    for stem in branches:
-      clusters.append(get_all_clusters(stem))
+      c = get_all_clusters(stem)
+      print_tree(stem)
+      print(c)
+      clusters.append(c)
+   print(clusters)
    centroids = calc_centroids(clusters)
 
    return trimmed_tree, centroids, clusters

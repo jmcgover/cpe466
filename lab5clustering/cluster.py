@@ -122,6 +122,7 @@ def print_stats(dataset, algorithm, clusters, centroids, file=sys.stdout):
          empty_clusters.add(j)
       num += len(cluster)
       print('--------------------')
+   assert num == dataset.size()
    print('Num Empty clusters: %d' % len(empty_clusters))
    if len(empty_clusters):
       print('Empty Clusters: ', end='')

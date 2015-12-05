@@ -1,4 +1,4 @@
-Id, Flavor, Food, Price, Type
+id, flavor, food, price, type
 0,Chocolate,Cake,8.95,Food
 1,Lemon,Cake,8.95,Food
 2,Casino,Cake,15.95,Food

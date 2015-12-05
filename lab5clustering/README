@@ -14,11 +14,12 @@
                   ##::::::: ##.... ##: ##:::: ##::::'##::: ##:
                   ########: ##:::: ##: ########:::::. ######::
                  ........::..:::::..::........:::::::......:::
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CPE 466 Fall 2015
 Lab 5: Clustering
 Jeff McGovern - jmcgover@calpoly.edu
 Nicole Martin - nlmartin@calpoly.edu
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In order to run these programs, you will need a symlink or executable to Python3 in:
 
 	/usr/local/bin/python3
@@ -28,4 +29,78 @@ Once that is done, simply run one of the two for more information:
 	./kmeans --help
 	./hclustering --help
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 The output of these two are below:
+./kmeans.py --help
+usage: ./kmeans.py [-h] [-i] [-e | -t | -d | -p]
+                   <Filename> <k> [Header_Filename]
+
+k-Means Clustering
+
+positional arguments:
+  <Filename>          name of the CSV file containing the input dataset
+  <k>                 number of clusters the program has to produce
+  Header_Filename     name of the CSV file containing the input dataset's header
+                      
+                        If [Header_Filename] IS NOT provided, the program can deduce the header
+                        file from the data filename by prepending 'header_' to it, using a
+                        '.txt' extension instead, and looking in the working directory,
+                        by adding the [-i | --infer-header] flag to the arguments.
+
+optional arguments:
+  -h, --help          show this help message and exit
+  -i, --infer-header  infer the header from the data file filename
+  -e, --euclidean     distance metric: euclidean (default)
+  -t, --taxicab       distance metric: taxicab (manhattan)
+  -d, --dot           distance metric: dot product
+  -p, --pearson       distance metric: pearson correlation
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+./hclustering.py --help
+usage: ./hclustering.py [-h] [-i] [-s | -c | -a | -m] [-e | -t | -d | -p]
+                        <Filename> [threshold] [Header_Filename]
+
+Hierarchical Clustering
+
+positional arguments:
+  <Filename>          name of the CSV file containing the input dataset
+  threshold           optional threshold at which the program will "cut" the 
+                      cluster hierarchy to report the clusters:
+                      
+                        If <threshold> parameter IS specified in the input, the
+                        program shall produce both the cluster hierarchy, and the
+                        appropriate list of clusters cut at the specified
+                        threshold.
+                      
+                        If <threshold> parameter IS NOT specified in the input, the
+                        program shall produce the cluster hierarchy alone.
+  Header_Filename     name of the CSV file containing the input dataset's header
+                      
+                        If [Header_Filename] IS NOT provided, the program can deduce the header
+                        file from the data filename by prepending 'header_' to it, using a
+                        '.txt' extension instead, and looking in the working directory,
+                        by adding the [-i | --infer-header] flag to the arguments.
+
+optional arguments:
+  -h, --help          show this help message and exit
+  -i, --infer-header  infer the header from the data file filename
+  -s, --single        cluster distance: single link (default)
+  -c, --complete      cluster distance: complete link
+  -a, --average       cluster distance: average link
+  -m, --centroid      cluster distance: centroid method
+  -e, --euclidean     distance metric: euclidean (default)
+  -t, --taxicab       distance metric: taxicab (manhattan)
+  -d, --dot           distance metric: dot product
+  -p, --pearson       distance metric: pearson correlation
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ ________________________________________ 
+< A mushroom cloud has no silver lining. >
+ ---------------------------------------- 
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||

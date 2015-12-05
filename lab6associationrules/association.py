@@ -9,7 +9,16 @@ import errno
 import os
 import sys
 
+sys.path.append(os.getcwd())
+import lab6
+
 def main():
+   # PARSE ARGS
+   data_filename = None
+   min_sup = None
+   min_conf = None
+   arg_parser = lab6.get_association_args()
+   args = arg_parser.parse_args()
 
    return 0
 

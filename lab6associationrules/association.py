@@ -71,30 +71,23 @@ class MarketBasketTransactions(object):
 class Apriori(object):
    def __self__():
       return
-   def get_associations(self, T, min_sup, min_conf):
+   def get_associations(self, T, min_sup, min_conf, skyline=False):
       print('Generating frequent itemsets for %.3f...' % (min_sup))
       frequent = self.apriori(T, min_sup)
-      print(frequent)
-      for f in frequent:
-         print('%s' % (f))
+      print('Generating rules with confidence %.3f...' % (min_conf))
       rules = self.gen_rules(T, frequent, min_conf)
-      for k in range(len(rules)):
-         #print('rules[%d]: %s' % (k, rules[k]))
-         for a,c in rules[k]:
-            print('%d: %s-->%s' % (k,a,c))
+      print('DONE')
    def gen_rules(self, T, F, min_conf):
-      rules = [{}, {}]
+      rules = set()
       H = [None, None]
       for k in range(2, len(F)):
-         print(k)
-         rules.append(set())
          for f in F[k]:
             H[1] = []
             for s in f:
                antecedent = f - {s}
                consequent = {s}
                if T.confidence(antecedent, consequent) >= min_conf:
-                  rules[k].add((frozenset(antecedent), frozenset(consequent)))
+                  rules.add((frozenset(antecedent), frozenset(consequent)))
                   H[1].append(consequent)
                #else:
                   #print('skipping %s-->%s' % (antecedent, consequent))
@@ -102,15 +95,12 @@ class Apriori(object):
       return rules
    def ap_gen_rules(self, T, f, min_conf, rules, H, k, m):
       if k > m + 1 and H[m]:
-         print('SHIIIIIIIIIIIIT')
-         print('H_m: %s' % (H[m]))
          H.append(None)
          H[m + 1] = self.candidate_gen(H, m)
-         print('H_m_1: %s' % (H[m + 1]))
          for h in H[m + 1]:
             confidence = T.confidence(f, f - h)
             if confidence >= min_conf:
-               rules[m + 1].add((frozenset(f - h), frozenset(f)))
+               rules.add((frozenset(f - h), frozenset(h)))
          self.ap_gen_rules(T, f, min_conf, rules, H, k, m + 1)
       return
    def candidate_gen(self, F, k):
@@ -121,25 +111,24 @@ class Apriori(object):
          if len(f_1 | f_2) == len(f_1) + 1:
             c = f_1 | f_2
             add_candidate = True
-            print('c %d: %s' % (k, c))
+            #print('c %d: %s' % (k, c))
             for s in combinations(c,k):
                subset = set(s)
                #print('subset: %s' % (subset))
                if subset not in F[k]:
                   add_candidate = False
-               else:
-                  print('skipping: %s' % (subset))
+               #else:
+                  #print('skipping: %s' % (subset))
             C_k.append(c) if add_candidate else None
       return C_k
    def apriori(self, T, min_sup):
-      C = [None] # Candidates
-      C.append(None)
+      C = [None, None] # Candidates
       C[1] = [{c} for c in T.get_items()]
-      F = [None] # Frequent Itemsets
-      F.append(None)
+      F = [None, None] # Frequent Itemsets
       F[1] = [f for f in C[1] if T.support(f) >= min_sup]
       k = 2
       while len(F[k - 1])  > 0:
+         print('k: %d | F[%d]: %s' % (k, k - 1, F[k - 1]))
          C.append(None) #C_k
          C[k] = self.candidate_gen(F, k-1)
          #print('C[%d]: %s' % (k,C[k]))
@@ -152,6 +141,12 @@ class Apriori(object):
          #print('len(F[%d-1]): %d' % (k, len(F[k - 1])))
       del F[k-1] # Gets rid of the empty list
       return F
+   def get_row_tuple(self, T, rule, id_converter_f):
+      antecedent_str, consequent, support, confidence = None, None, None, None
+      for a,c in rule:
+         for a in ante:
+            print()
+      return antecedent, consequent, support, confidence
 
 
 def main():
@@ -170,7 +165,9 @@ def main():
    transactions = MarketBasketTransactions(data_filename)
    # CALC ASSOCIATIONS
    apriori = Apriori()
-   apriori.get_associations(transactions, min_sup, min_conf)
+   rules = apriori.get_associations(transactions, min_sup, min_conf)
+   for rule in rules:
+      print('%s---->%s' % rule)
    return 0
 
 if __name__ == '__main__':

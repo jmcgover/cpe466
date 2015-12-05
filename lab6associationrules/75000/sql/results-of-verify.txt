@@ -1,0 +1,25 @@
+
+Number of Goods
+---------------
+	     50
+
+
+Number of Locations
+-------------------
+		 20
+
+
+Number of Employees
+-------------------
+		 50
+
+
+Number of Receipts
+-------------------
+	      75000
+
+
+Number of Items
+---------------
+	 266209
+

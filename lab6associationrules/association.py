@@ -5,9 +5,16 @@
 # Jeff McGovern - jmcgover@calpoly.edu
 # Nicole Martin - nlmartin@calpoly.edu
 
+import csv
 import errno
 import os
 import sys
+
+import collections
+from collections import defaultdict
+
+import itertools
+from itertools import combinations
 
 sys.path.append(os.getcwd())
 import lab6
@@ -15,6 +22,11 @@ import lab6
 import bakery
 from bakery import GoodsDatabase
 from bakery import Good
+
+class Candidate(object):
+   def __init__(self, items):
+      self.frozen = frozenset(items) # The association of sets
+      self.items = set(items) # Set of all items in candidate
 
 class MarketBasketTransactions(object):
    def __init__(self, csv_filename):
@@ -40,6 +52,8 @@ class MarketBasketTransactions(object):
       self.item_counts = item_counts
    def get_items(self):
       return self.item_counts.keys()
+   def get_get_transactions(self):
+      return self.baskets
    def get_num_transactions(self):
       return self.num_transactions
    def count(self, X):
@@ -53,6 +67,92 @@ class MarketBasketTransactions(object):
       return support_count / self.num_transactions
    def confidence(self, X, Y):
       return self.count(X.union(Y)) / self.count(X)
+
+class Apriori(object):
+   def __self__():
+      return
+   def get_associations(self, T, min_sup, min_conf):
+      print('Generating frequent itemsets for %.3f...' % (min_sup))
+      frequent = self.apriori(T, min_sup)
+      print(frequent)
+      for f in frequent:
+         print('%s' % (f))
+      rules = self.gen_rules(T, frequent, min_conf)
+      for k in range(len(rules)):
+         #print('rules[%d]: %s' % (k, rules[k]))
+         for a,c in rules[k]:
+            print('%d: %s-->%s' % (k,a,c))
+   def gen_rules(self, T, F, min_conf):
+      rules = [{}, {}]
+      H = [None, None]
+      for k in range(2, len(F)):
+         print(k)
+         rules.append(set())
+         for f in F[k]:
+            H[1] = []
+            for s in f:
+               antecedent = f - {s}
+               consequent = {s}
+               if T.confidence(antecedent, consequent) >= min_conf:
+                  rules[k].add((frozenset(antecedent), frozenset(consequent)))
+                  H[1].append(consequent)
+               #else:
+                  #print('skipping %s-->%s' % (antecedent, consequent))
+            self.ap_gen_rules(T, f, min_conf, rules, H, k, 1)
+      return rules
+   def ap_gen_rules(self, T, f, min_conf, rules, H, k, m):
+      if k > m + 1 and H[m]:
+         print('SHIIIIIIIIIIIIT')
+         print('H_m: %s' % (H[m]))
+         H.append(None)
+         H[m + 1] = self.candidate_gen(H, m)
+         print('H_m_1: %s' % (H[m + 1]))
+         for h in H[m + 1]:
+            confidence = T.confidence(f, f - h)
+            if confidence >= min_conf:
+               rules[m + 1].add((frozenset(f - h), frozenset(f)))
+         self.ap_gen_rules(T, f, min_conf, rules, H, k, m + 1)
+      return
+   def candidate_gen(self, F, k):
+      C_k = []
+      print('F[%d]: %s' % (k, F[k]))
+      for f_1,f_2 in itertools.combinations(F[k], 2):
+         print('f1: %s f2: %s union: %s' % (f_1, f_2, f_1 | f_2))
+         if len(f_1 | f_2) == len(f_1) + 1:
+            c = f_1 | f_2
+            add_candidate = True
+            print('c %d: %s' % (k, c))
+            for s in combinations(c,k):
+               subset = set(s)
+               #print('subset: %s' % (subset))
+               if subset not in F[k]:
+                  add_candidate = False
+               else:
+                  print('skipping: %s' % (subset))
+            C_k.append(c) if add_candidate else None
+      return C_k
+   def apriori(self, T, min_sup):
+      C = [None] # Candidates
+      C.append(None)
+      C[1] = [{c} for c in T.get_items()]
+      F = [None] # Frequent Itemsets
+      F.append(None)
+      F[1] = [f for f in C[1] if T.support(f) >= min_sup]
+      k = 2
+      while len(F[k - 1])  > 0:
+         C.append(None) #C_k
+         C[k] = self.candidate_gen(F, k-1)
+         #print('C[%d]: %s' % (k,C[k]))
+         F.append([])
+         for c in C[k]:
+            support = T.support(c)
+            if T.support(c) >= min_sup:
+               F[k].append(c)
+         k += 1
+         #print('len(F[%d-1]): %d' % (k, len(F[k - 1])))
+      del F[k-1] # Gets rid of the empty list
+      return F
+
 
 def main():
    # PARSE ARGS
@@ -68,6 +168,9 @@ def main():
    goods_db = GoodsDatabase('goods.csv')
    # BUILD BASKETS
    transactions = MarketBasketTransactions(data_filename)
+   # CALC ASSOCIATIONS
+   apriori = Apriori()
+   apriori.get_associations(transactions, min_sup, min_conf)
    return 0
 
 if __name__ == '__main__':

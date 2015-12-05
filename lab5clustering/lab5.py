@@ -10,6 +10,13 @@ import argparse
 import os
 import sys
 
+sys.path.append(os.getcwd())
+import distances
+from distances import euclidean_distance
+from distances import manhattan_distance
+from distances import dot
+from distances import pearson_correlation
+
 # ARGUMENTS
 class SmartFormatter(argparse.HelpFormatter):
 
@@ -60,6 +67,20 @@ def get_k_means_args(description=DESCRIPTION_KMEANS):
    arg_parser.add_argument('-i', '--infer-header',
          action='store_true',
          help='infer the header from the data file filename')
+   # DIST METRIC
+   arg_dists = arg_parser.add_mutually_exclusive_group()
+   arg_dists.add_argument('-e', '--euclidean',
+         action='store_true', default=True,
+         help='distance metric: euclidean (default)')
+   arg_dists.add_argument('-t', '--taxicab',
+         action='store_true', default=False,
+         help='distance metric: taxicab (manhattan)')
+   arg_dists.add_argument('-d', '--dot',
+         action='store_true', default=False,
+         help='distance metric: dot product')
+   arg_dists.add_argument('-p', '--pearson',
+         action='store_true', default=False,
+         help='distance metric: pearson correlation')
    return arg_parser
 
 DESCRIPTION_HIERARCHICAL = 'Hierarchical Clustering'
@@ -92,4 +113,46 @@ def get_hierarchical_args(description=DESCRIPTION_HIERARCHICAL):
    arg_parser.add_argument('-i', '--infer-header',
          action='store_true',
          help='infer the header from the data file filename')
+   # CLUSTER DISTS
+   arg_clusts = arg_parser.add_mutually_exclusive_group()
+   arg_clusts.add_argument('-s', '--single',
+         action='store_true', default=True,
+         help='cluster distance: single link (default)')
+   arg_clusts.add_argument('-c', '--complete',
+         action='store_true', default=False,
+         help='cluster distance: complete link')
+   arg_clusts.add_argument('-a', '--average',
+         action='store_true', default=False,
+         help='cluster distance: average link')
+   arg_clusts.add_argument('-m', '--centroid',
+         action='store_true', default=False,
+         help='cluster distance: centroid method')
+   # DIST METRIC
+   arg_dists = arg_parser.add_mutually_exclusive_group()
+   arg_dists.add_argument('-e', '--euclidean',
+         action='store_true', default=True,
+         help='distance metric: euclidean (default)')
+   arg_dists.add_argument('-t', '--taxicab',
+         action='store_true', default=False,
+         help='distance metric: taxicab (manhattan)')
+   arg_dists.add_argument('-d', '--dot',
+         action='store_true', default=False,
+         help='distance metric: dot product')
+   arg_dists.add_argument('-p', '--pearson',
+         action='store_true', default=False,
+         help='distance metric: pearson correlation')
    return arg_parser
+
+def get_distance_metric(args):
+   if args.taxicab:
+      print('Using Manhattan')
+      return manhattan_distance
+   if args.dot:
+      print('Using Dot')
+      return dot
+   if args.pearson:
+      print('Using Pearson')
+      return pearson_correlation
+   if args.euclidean:
+      print('Using Euclidean')
+      return euclidean_distance

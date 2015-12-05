@@ -110,6 +110,7 @@ def main():
    print('Euc %s and %s: %f' % (a, b, euclidean_distance(a,b)))
    print('Man %s and %s: %f' % (a, b, manhattan_distance(a,b)))
    print('Pea %s and %s: %f' % (a, b, pearson_correlation(a,b)))
+   print('Pea %s and %s: %f' % (c, c, pearson_correlation(c,c)))
    print('Med %s: %d' % (c, median_row(c)))
    print('Med %s: %d' % ([a,b,c,d,e], median_col([a,b,c,d,e], 2)))
 

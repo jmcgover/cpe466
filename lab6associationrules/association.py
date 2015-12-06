@@ -72,11 +72,12 @@ class Apriori(object):
    def __self__():
       return
    def get_associations(self, T, min_sup, min_conf, skyline=False):
-      print('Generating frequent itemsets for %.3f...' % (min_sup))
+      print('Generating frequent itemsets for %.3f...' % (min_sup), file=sys.stderr)
       frequent = self.apriori(T, min_sup)
-      print('Generating rules with confidence %.3f...' % (min_conf))
+      print('Generating rules with confidence %.3f...' % (min_conf), file=sys.stderr)
       rules = self.gen_rules(T, frequent, min_conf)
-      print('DONE')
+      print('DONE', file=sys.stderr)
+      return frequent, rules
    def gen_rules(self, T, F, min_conf):
       rules = set()
       H = [None, None]
@@ -90,7 +91,7 @@ class Apriori(object):
                   rules.add((frozenset(antecedent), frozenset(consequent)))
                   H[1].append(consequent)
                #else:
-                  #print('skipping %s-->%s' % (antecedent, consequent))
+                  #print('skipping %s-->%s' % (antecedent, consequent), file-sys.stderr)
             self.ap_gen_rules(T, f, min_conf, rules, H, k, 1)
       return rules
    def ap_gen_rules(self, T, f, min_conf, rules, H, k, m):
@@ -105,20 +106,20 @@ class Apriori(object):
       return
    def candidate_gen(self, F, k):
       C_k = []
-      print('F[%d]: %s' % (k, F[k]))
+      print('\tGenerating Candidates for F[%d]: %s' % (k, F[k]), file=sys.stderr)
       for f_1,f_2 in itertools.combinations(F[k], 2):
-         print('f1: %s f2: %s union: %s' % (f_1, f_2, f_1 | f_2))
+         #print('f1: %s f2: %s union: %s' % (f_1, f_2, f_1 | f_2), file=sys.stderr)
          if len(f_1 | f_2) == len(f_1) + 1:
             c = f_1 | f_2
             add_candidate = True
-            #print('c %d: %s' % (k, c))
+            #print('c %d: %s' % (k, c), file=sys.stderr)
             for s in combinations(c,k):
                subset = set(s)
-               #print('subset: %s' % (subset))
+               #print('subset: %s' % (subset), file=sys.stderr)
                if subset not in F[k]:
                   add_candidate = False
                #else:
-                  #print('skipping: %s' % (subset))
+                  #print('skipping: %s' % (subset), file=sys.stderr)
             C_k.append(c) if add_candidate else None
       return C_k
    def apriori(self, T, min_sup):
@@ -128,25 +129,49 @@ class Apriori(object):
       F[1] = [f for f in C[1] if T.support(f) >= min_sup]
       k = 2
       while len(F[k - 1])  > 0:
-         print('k: %d | F[%d]: %s' % (k, k - 1, F[k - 1]))
+         #print('k: %d | F[%d]: %s' % (k, k - 1, F[k - 1]), file=sys.stderr)
          C.append(None) #C_k
          C[k] = self.candidate_gen(F, k-1)
-         #print('C[%d]: %s' % (k,C[k]))
+         #print('C[%d]: %s' % (k,C[k]), file=sys.stderr)
          F.append([])
          for c in C[k]:
             support = T.support(c)
-            if T.support(c) >= min_sup:
+            if T.support(c) >= min_sup and c not in F[k]:
                F[k].append(c)
          k += 1
-         #print('len(F[%d-1]): %d' % (k, len(F[k - 1])))
+         #print('len(F[%d-1]): %d' % (k, len(F[k - 1])), file=sys.stderr)
       del F[k-1] # Gets rid of the empty list
       return F
-   def get_row_tuple(self, T, rule, id_converter_f):
-      antecedent_str, consequent, support, confidence = None, None, None, None
-      for a,c in rule:
-         for a in ante:
-            print()
-      return antecedent, consequent, support, confidence
+   def get_id_str(self, itemset, db):
+      str = None
+      for id in itemset:
+         if str:
+            str += '-' + db.id_str(id)
+         else:
+            str = db.id_str(id)
+      return str
+   def get_row_tuple(self, T, rule, db):
+      antecedent_str, consequent_str, support, confidence = None, None, None, None
+      if not rule:
+         return
+      a,c = rule
+      antecedent_str = self.get_id_str(a, db)
+      consequent_str = self.get_id_str(c, db)
+      support = T.support(a | c)
+      confidence = T.confidence(a , c)
+      return antecedent_str, consequent_str, support, confidence
+   def print_items_csv(self, T, db, frequent, file=sys.stdout):
+      print('%s,%s,%s,%s' % \
+            ('size', 'itemset', 'support', ''), file=file)
+      for f,k in zip(frequent, range(len(frequent))):
+         if f:
+            for e in f:
+               print('%s,%s,%s,%s' % (k, self.get_id_str(e, db), T.support(e),''), file=file)
+   def print_rules_csv(self, T, db, rules, file=sys.stdout):
+      print('%s,%s,%s,%s' % \
+            ('antecedent', 'consequent', 'support', 'confidence'), file=file)
+      for rule in rules:
+         print('%s,%s,%.3f,%.3f' % self.get_row_tuple(T, rule, db), file=file)
 
 
 def main():
@@ -165,9 +190,12 @@ def main():
    transactions = MarketBasketTransactions(data_filename)
    # CALC ASSOCIATIONS
    apriori = Apriori()
-   rules = apriori.get_associations(transactions, min_sup, min_conf)
-   for rule in rules:
-      print('%s---->%s' % rule)
+   frequent, rules = apriori.get_associations(transactions, min_sup, min_conf)
+   outfile = sys.stdout
+   print('%s,%s,%s,%s' % ('file','min_sup','min_conf',''), file=outfile)
+   print('%s,%s,%s,%s' % (data_filename,min_sup,min_conf,''), file=outfile)
+   apriori.print_items_csv(transactions, goods_db, frequent)
+   apriori.print_rules_csv(transactions, goods_db, rules)
    return 0
 
 if __name__ == '__main__':

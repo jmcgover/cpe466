@@ -45,8 +45,13 @@ class GoodsDatabase(object):
 
    def get_flavor_food(self, id):
       return self.goods_db[id].flavor, self.goods_db[id].food
-   def get_food_flavor(self, id):
+   def get_food_flavor_tuple(self, id):
       return self.goods_db[id].food, self.goods_db[id].flavor
+   def get_food_flavor_str(self, id):
+      food,flavor = self.get_food_flavor_tuple(id)
+      return '(%s+%s)' % (food, flavor)
+   def id_str(self, id):
+      return self.get_food_flavor_str(id)
 
 class Good(object):
    def __init__(self,

@@ -159,19 +159,32 @@ class Apriori(object):
       consequent_str = self.get_id_str(c, db)
       support = T.support(a | c)
       confidence = T.confidence(a , c)
-      return antecedent_str, consequent_str, support, confidence
+      return support, confidence, antecedent_str, consequent_str
    def print_items_csv(self, T, db, frequent, file=sys.stdout):
       print('%s,%s,%s,%s' % \
             ('size', 'itemset', 'support', ''), file=file)
       for f,k in zip(frequent, range(len(frequent))):
          if f:
             for e in f:
-               print('%s,%s,%s,%s' % (k, self.get_id_str(e, db), T.support(e),''), file=file)
+               print('%s,%s,%s,%s' % (k, T.support(e), self.get_id_str(e, db),''), file=file)
    def print_rules_csv(self, T, db, rules, file=sys.stdout):
       print('%s,%s,%s,%s' % \
-            ('antecedent', 'consequent', 'support', 'confidence'), file=file)
+            ('support', 'confidence', 'antecedent', 'consequent'), file=file)
       for rule in rules:
-         print('%s,%s,%.3f,%.3f' % self.get_row_tuple(T, rule, db), file=file)
+         print('%.3f,%.3f,%s,%s' % self.get_row_tuple(T, rule, db), file=file)
+
+   def print_items_latex(self, T, db, frequent, file=sys.stdout):
+      print('%s,%s,%s,%s' % \
+            ('size', 'itemset', 'support', ''), file=file)
+      for f,k in zip(frequent, range(len(frequent))):
+         if f:
+            for e in f:
+               print('%s,%s,%s,%s' % (k, T.support(e), self.get_id_str(e, db),''), file=file)
+   def print_rules_latex(self, T, db, rules, file=sys.stdout):
+      print('%s,%s,%s,%s' % \
+            ('support', 'confidence', 'antecedent', 'consequent'), file=file)
+      for rule in rules:
+         print('%.3f,%.3f,%s,%s' % self.get_row_tuple(T, rule, db), file=file)
 
 
 def main():

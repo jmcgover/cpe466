@@ -1,0 +1,44 @@
+      :'######::'########::'########::::'##:::::::::'#######:::'#######::
+      '##... ##: ##.... ##: ##.....::::: ##:::'##::'##.... ##:'##.... ##:
+       ##:::..:: ##:::: ##: ##:::::::::: ##::: ##:: ##::::..:: ##::::..::
+       ##::::::: ########:: ######:::::: ##::: ##:: ########:: ########::
+       ##::::::: ##.....::: ##...::::::: #########: ##.... ##: ##.... ##:
+       ##::: ##: ##:::::::: ##::::::::::...... ##:: ##:::: ##: ##:::: ##:
+      . ######:: ##:::::::: ########:::::::::: ##::. #######::. #######::
+      :......:::..:::::::::........:::::::::::..::::.......::::.......:::
+                 '##::::::::::'###::::'########::::::'#######::
+                  ##:::::::::'## ##::: ##.... ##::::'##.... ##:
+                  ##::::::::'##:. ##:: ##:::: ##:::: ##::::..::
+                  ##:::::::'##:::. ##: ########::::: ########::
+                  ##::::::: #########: ##.... ##:::: ##.... ##:
+                  ##::::::: ##.... ##: ##:::: ##:::: ##:::: ##:
+                  ########: ##:::: ##: ########:::::. #######::
+                 ........::..:::::..::........:::::::.......:::
+CPE 466 Fall 2015
+Lab 6: Association Rule Mining
+Jeff McGovern - jmcgover@calpoly.edu
+Nicole Martin - nlmartin@calpoly.edu
+
+Right now, only the out1.csv works.
+
+./association.py --help
+usage: ./association.py [-h] filename <min_sup> <min_conf>
+
+Association Rule Mining
+
+positional arguments:
+  filename    name of the CSV file containing the input dataset
+  <min_sup>   minimum support number for frequent itemset and association rule
+              discovery
+  <min_conf>  minimum confidence number for association rule discovery.
+
+optional arguments:
+  -h, --help  show this help message and exit
+ _________________________ 
+< With your bare hands?!? >
+ ------------------------- 
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||

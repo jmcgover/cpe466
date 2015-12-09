@@ -78,9 +78,23 @@ class MarketBasketTransactions(object):
 class Apriori(object):
    def __self__():
       return
+   def get_skyline_frequent(self, frequent):
+      print('FILTERING SKYLINE', file=sys.stderr)
+      new_frequent = []
+      for i in range(len(frequent)):
+         new_frequent.append(set())
+         for f in frequent[i]:
+            for f in range(len(j, len(frequent))):
+               if f in frequent[j]:
+                  is_subset = True
+                  break
+            if not is_subset:
+               new_frequent[i].add(f)
+      return new_frequent
    def get_associations(self, T, min_sup, min_conf, skyline=False):
       print('Generating frequent itemsets for %.3f...' % (min_sup), file=sys.stderr)
       frequent = self.apriori(T, min_sup)
+      frequent = self.get_skyline_frequent(frequent) if self.filter_skyline else frequent
       print('Generating rules with confidence %.3f...' % (min_conf), file=sys.stderr)
       rules = self.gen_rules(T, frequent, min_conf)
       print('DONE', file=sys.stderr)
@@ -178,7 +192,15 @@ class Apriori(object):
       print('%s,%s,%s,%s' % \
             ('support', 'confidence', 'antecedent', 'consequent'), file=file)
       for rule in rules:
-         print('%.3f,%.3f,%s,%s' % self.get_row_tuple(T, rule, db), file=file)
+         a,b = rule
+         if len(a) > 1 or len(b) > 1:
+            print('%.3f,%.3f,%s,%s' % self.get_row_tuple(T, rule, db), file=file)
+
+   def print_rules_arrows(self, T, db, rules, file=sys.stdout):
+      print('(%s)(%s)%s-->%s' % \
+            ('support', 'confidence', 'antecedent', 'consequent'), file=file)
+      for rule in rules:
+         print('(%.3f)(%.3f) %s-->%s' % self.get_row_tuple(T, rule, db), file=file)
 
    def print_items_latex(self, T, db, frequent, file=sys.stdout):
       print('%s,%s,%s,%s' % \
@@ -214,8 +236,9 @@ def main():
    outfile = sys.stdout
    print('%s,%s,%s,%s' % ('file','min_sup','min_conf',''), file=outfile)
    print('%s,%s,%s,%s' % (data_filename,min_sup,min_conf,''), file=outfile)
-   apriori.print_items_csv(transactions, beers_db, frequent)
+   #apriori.print_items_csv(transactions, beers_db, frequent)
    apriori.print_rules_csv(transactions, beers_db, rules)
+   #apriori.print_rules_arrow(transactions, beers_db, rules)
    return 0
 
 if __name__ == '__main__':

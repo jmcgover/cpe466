@@ -26,34 +26,7 @@ class TypeDBMaker(object):
    def print_table(self, file=sys.stdout):
       print('%s, %s' % ('id', 'type'), file=file)
       for type,id in self.type_db.items():
-         print('%d, %s' % (id, type.replace(',',' '))
-
-class BeerDB(object):
-   def __init__(self, csv_filename):
-      # INITIALIZE MEMBERS
-      self.csv_filename = csv_filename
-      self.type_db = None
-      self.header = None
-
-      # READ FILE
-      type_db = dict()
-      header = None
-      with open(csv_filename) as type_db_file:
-         header = type_db_file.__next__()
-         for record in type_db_file:
-            new_type = Type(csv_str=record)
-            type_db[new_type.id] = new_type
-      self.type_db = type_db
-      self.header = header
-   def __iter__(self):
-      return self.type_db.items().__iter__()
-   def get_type_name(self, id):
-      return self.type_db[id].type
-   def get_type_str(self, id):
-      type = self.get_type_name(id)
-      return '(%s)' % (type.strip())
-   def id_str(self, id):
-      return self.get_type_str(id)
+         print('%d, %s' % (id, type.replace(',',' ')))
 
 class Type(object):
    def __init__(self,
@@ -84,6 +57,38 @@ class Type(object):
    def __hash__(self):
       return self.id.__hash__()
 
+class BeerDB(object):
+   def __init__(self, csv_filename):
+      # INITIALIZE MEMBERS
+      self.csv_filename = csv_filename
+      self.type_db = None
+      self.header = None
+
+      # READ FILE
+      type_db = dict()
+      header = None
+      with open(csv_filename) as type_db_file:
+         header = type_db_file.__next__()
+         for record in type_db_file:
+            new_type = Type(csv_str=record)
+            type_db[new_type.id] = new_type
+      self.type_db = type_db
+      self.header = header
+   def __iter__(self):
+      return self.type_db.items().__iter__()
+   def get_type_name(self, id):
+      return self.type_db[id].type
+   def get_type_str(self, id):
+      type = self.get_type_name(id)
+      return '(%s)' % (type.strip())
+   def id_str(self, id):
+      return self.get_type_str(id)
+"""
+BeerDBMaker
+
+Builds a database table for beers, creating unique ids for each brewery-beer
+tuple, with the ability to save the database as a .csv file for later parsing.
+"""
 class BeerDBMaker(object):
    def __init__(self):
       self.beer_db = {}
@@ -100,7 +105,45 @@ class BeerDBMaker(object):
       for (brewery, beer),id in self.beer_db.items():
          print('%d, %s, %s' % (id, brewery.replace(',',''), beer.replace(',','_')), file=file)
 
+"""
+BeerDB
 
+Parses a BeerDB table -- a csv with brewery and beer name fields -- to create a
+translation from ids to brewery-beer names.
+"""
+class BeerDB(object):
+   def __init__(self, csv_filename):
+      # INITIALIZE MEMBERS
+      self.csv_filename = csv_filename
+      self.beer_db = None
+      self.header = None
+
+      # READ FILE
+      beer_db = dict()
+      header = None
+      with open(csv_filename) as beer_db_file:
+         header = beer_db_file.__next__()
+         for record in beer_db_file:
+            good = Beer(csv_str=record)
+            beer_db[good.id] = good
+      self.beer_db = beer_db
+      self.header = header
+   def __iter__(self):
+      return self.beer_db.items().__iter__()
+   def get_brewery_beer_tuple(self, id):
+      return self.beer_db[id].brewery, self.beer_db[id].beer
+   def get_brewery_beer_str(self, id):
+      brewery,beer = self.get_brewery_beer_tuple(id)
+      return '{%s+%s}' % (brewery.strip(), beer.strip())
+   def id_str(self, id):
+      return self.get_brewery_beer_str(id)
+
+"""
+Beer
+
+Represents a brewery-beer tuple with a unique id by parsing a csv string into
+the aforementinoed fields.
+"""
 class Beer(object):
    def __init__(self,
          id=None,
@@ -135,34 +178,11 @@ class Beer(object):
    def __hash__(self):
       return self.id.__hash__()
 
-class BeerDB(object):
-   def __init__(self, csv_filename):
-      # INITIALIZE MEMBERS
-      self.csv_filename = csv_filename
-      self.beer_db = None
-      self.header = None
+"""
+UntappdDB
 
-      # READ FILE
-      beer_db = dict()
-      header = None
-      with open(csv_filename) as beer_db_file:
-         header = beer_db_file.__next__()
-         for record in beer_db_file:
-            good = Beer(csv_str=record)
-            beer_db[good.id] = good
-      self.beer_db = beer_db
-      self.header = header
-   def __iter__(self):
-      return self.beer_db.items().__iter__()
-   def get_brewery_beer_tuple(self, id):
-      return self.beer_db[id].brewery, self.beer_db[id].beer
-   def get_brewery_beer_str(self, id):
-      brewery,beer = self.get_brewery_beer_tuple(id)
-      return '%s+%s' % (brewery.strip(), beer.strip())
-   def id_str(self, id):
-      return self.get_brewery_beer_str(id)
-
-
+A MongoDB database wrapper that abstracts the insertion and retrieval overhead in order to make 
+"""
 class UntappdDB(object):
    def __init__(self):
       # Initialize Members
@@ -186,7 +206,6 @@ class UntappdDB(object):
    def query(self, collection_name, query=None, projection=None):
       collection = self.db[collection_name]
       return collection.find(query, projection)
-
 
 class UntappdRequester(object):
    def __init__(self, client_id, client_secret, request_limit):

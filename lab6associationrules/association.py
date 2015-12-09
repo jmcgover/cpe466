@@ -87,7 +87,9 @@ class Apriori(object):
             for s in f:
                antecedent = f - {s}
                consequent = {s}
-               if T.confidence(antecedent, consequent) >= min_conf:
+               conf = T.confidence(antecedent, consequent)
+               if  conf >= min_conf:
+                  print('conf: %.3f' % (conf))
                   rules.add((frozenset(antecedent), frozenset(consequent)))
                   H[1].append(consequent)
                #else:
@@ -99,8 +101,10 @@ class Apriori(object):
          H.append(None)
          H[m + 1] = self.candidate_gen(H, m)
          for h in H[m + 1]:
-            confidence = T.confidence(f, f - h)
+            #confidence = T.confidence(f, f - h)
+            confidence = T.count(f) / T.count(f - h)
             if confidence >= min_conf:
+               print('conf: %.3f' % (confidence))
                rules.add((frozenset(f - h), frozenset(h)))
          self.ap_gen_rules(T, f, min_conf, rules, H, k, m + 1)
       return

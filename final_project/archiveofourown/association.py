@@ -99,7 +99,7 @@ class Apriori(object):
          H.append(None)
          H[m + 1] = self.candidate_gen(H, m)
          for h in H[m + 1]:
-            confidence = T.confidence(f, f - h)
+            confidence = T.count(f) / T.count(f - h)
             if confidence >= min_conf:
                rules.add((frozenset(f - h), frozenset(h)))
          self.ap_gen_rules(T, f, min_conf, rules, H, k, m + 1)

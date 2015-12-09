@@ -1,0 +1,46 @@
+CPE 466 Fall 2015
+Final Project
+Nicole Martin - nlmartin@calpoly.edu
+
+
+All htm files from archiveofourown.org used in this project are
+included in the allao3data.zip file along with scrape.py.
+
+Python3 with the urllib library are used by scrape.py to scrape
+AO3 webpages based on the supplied URL. The URL and page ranges
+are hardcoded in scrape.py and can be changed to for different
+fandoms and relevant page ranges. AO3 only displays a max of 20
+fanworks per page, so it will have to scrape a lot. All scraped
+pages are saved in the same directory as scrape.py is in.
+
+Once you have those pages, you can run the python3 script:
+
+   ./ao3parser_collection_tags.py
+
+Which will generate the alltags.csv and alldata-out1.csv needed
+for association rules mining. ao3parser_collection_tags will
+processes all htm files in the current directory, and it can 
+take several minutes to do so.
+
+Once you have alltags.csv and alldata-out1.csv, you can run
+the association rules mining script:
+
+   ./association.py --help
+   usage: ./association.py [-h] filename <min_sup> <min_conf>
+
+This will run the actual association rules mining same as in
+Lab6.
+
+#####################
+
+Association Rule Mining
+
+positional arguments:
+   filename    name of the CSV file containing the input dataset
+   <min_sup>   minimum support number for frequent itemset and association rule
+               discovery
+   <min_conf>  minimum confidence number for association rule discovery.
+
+optional arguments:
+   -h, --help  show this help message and exit
+

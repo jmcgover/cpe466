@@ -134,7 +134,7 @@ class BeerDB(object):
       return self.beer_db[id].brewery, self.beer_db[id].beer
    def get_brewery_beer_str(self, id):
       brewery,beer = self.get_brewery_beer_tuple(id)
-      return '{%s+%s}' % (brewery.strip(), beer.strip())
+      return '[%s=%s]' % (brewery.strip(), beer.strip())
    def id_str(self, id):
       return self.get_brewery_beer_str(id)
 
